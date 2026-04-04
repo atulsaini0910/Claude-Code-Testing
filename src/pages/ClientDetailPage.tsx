@@ -17,7 +17,7 @@ import type { Client } from '../types';
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { open } = useSidebar();
+  const { openSidebar, openCommandPalette } = useSidebar();
   const { getClient, updateClient, deleteClient } = useClients();
   const { getEntriesForClient, addEntry, deleteEntry } = useActivityLog();
 
@@ -30,7 +30,7 @@ export function ClientDetailPage() {
   if (!client) {
     return (
       <div className="flex flex-col flex-1">
-        <TopBar title="Client Not Found" onMenuClick={open} />
+        <TopBar title="Client Not Found" onMenuClick={openSidebar} />
         <div className="flex flex-col items-center justify-center flex-1">
           <p className="text-slate-500 mb-4">This client doesn't exist or was deleted.</p>
           <Button variant="secondary" onClick={() => navigate('/clients')}>
@@ -55,7 +55,8 @@ export function ClientDetailPage() {
     <div className="flex flex-col flex-1">
       <TopBar
         title={client.name}
-        onMenuClick={open}
+        onMenuClick={openSidebar}
+        onSearchClick={openCommandPalette}
         actions={
           <div className="flex items-center gap-2">
             <Button variant="secondary" size="sm" onClick={() => navigate('/clients')}>

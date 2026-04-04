@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { TextInput } from '../ui/TextInput';
+import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
-import type { Client, PropertyType, ClientStatus } from '../../types';
+import type { Client, PropertyType, ClientStatus, ClientType, LeadTemperature } from '../../types';
 
 type FormData = Omit<Client, 'id' | 'createdAt' | 'updatedAt'>;
 
@@ -12,47 +13,42 @@ interface ClientFormProps {
 }
 
 const defaultForm: FormData = {
-  name: '',
-  phone: '',
-  email: '',
-  budget: { min: 0, max: 0 },
-  propertyType: 'residential',
-  locationPreference: '',
-  status: 'active',
-  notes: '',
+  name: '', phone: '', email: '', budget: { min: 0, max: 0 },
+  propertyType: 'residential', locationPreference: '', status: 'active', notes: '',
+  clientType: 'buyer', leadTemperature: 'warm', source: '',
+  preApproved: false, preApprovalAmount: undefined,
+  tags: [], score: 50, assignedTo: undefined, customFields: {},
 };
-
-const selectClass =
-  'w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
 
 export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
   const [form, setForm] = useState<FormData>(
     initial
       ? {
-          name: initial.name,
-          phone: initial.phone,
-          email: initial.email,
-          budget: initial.budget,
-          propertyType: initial.propertyType,
-          locationPreference: initial.locationPreference,
-          status: initial.status,
-          notes: initial.notes,
+          name: initial.name, phone: initial.phone, email: initial.email,
+          budget: initial.budget, propertyType: initial.propertyType,
+          locationPreference: initial.locationPreference, status: initial.status, notes: initial.notes,
+          clientType: initial.clientType ?? 'buyer',
+          leadTemperature: initial.leadTemperature ?? 'warm',
+          source: initial.source ?? '',
+          preApproved: initial.preApproved ?? false,
+          preApprovalAmount: initial.preApprovalAmount,
+          tags: initial.tags ?? [], score: initial.score ?? 50,
+          assignedTo: initial.assignedTo, customFields: initial.customFields ?? {},
         }
       : defaultForm
   );
-  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
 
   const set = <K extends keyof FormData>(key: K, value: FormData[K]) =>
-    setForm((prev) => ({ ...prev, [key]: value }));
+    setForm(prev => ({ ...prev, [key]: value }));
 
-  const validate = (): boolean => {
+  const validate = () => {
     const e: typeof errors = {};
     if (!form.name.trim()) e.name = 'Name is required';
     if (!form.phone.trim()) e.phone = 'Phone is required';
     if (!form.email.trim()) e.email = 'Email is required';
-    if (form.budget.min < 0) e.budget = 'Min budget must be ≥ 0';
-    if (form.budget.max < form.budget.min) e.budget = 'Max must be ≥ min';
     if (!form.locationPreference.trim()) e.locationPreference = 'Location is required';
+    if (form.budget.max < form.budget.min) e.budget = 'Max must be ≥ min';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -64,102 +60,56 @@ export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <TextInput
-          label="Full Name"
-          value={form.name}
-          onChange={(e) => set('name', e.target.value)}
-          error={errors.name}
-          placeholder="Jane Smith"
-        />
-        <TextInput
-          label="Phone"
-          type="tel"
-          value={form.phone}
-          onChange={(e) => set('phone', e.target.value)}
-          error={errors.phone}
-          placeholder="(555) 000-0000"
-        />
-        <TextInput
-          label="Email"
-          type="email"
-          value={form.email}
-          onChange={(e) => set('email', e.target.value)}
-          error={errors.email}
-          placeholder="client@email.com"
-          className="sm:col-span-2"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <TextInput label="Full Name" value={form.name} onChange={e => set('name', e.target.value)} error={errors.name} placeholder="Jane Smith" className="sm:col-span-2" />
+        <TextInput label="Phone" type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} error={errors.phone} placeholder="(555) 000-0000" />
+        <TextInput label="Email" type="email" value={form.email} onChange={e => set('email', e.target.value)} error={errors.email} placeholder="client@email.com" />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Status</label>
-          <select
-            className={selectClass}
-            value={form.status}
-            onChange={(e) => set('status', e.target.value as ClientStatus)}
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="closed">Closed</option>
-          </select>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Property Type</label>
-          <select
-            className={selectClass}
-            value={form.propertyType}
-            onChange={(e) => set('propertyType', e.target.value as PropertyType)}
-          >
-            <option value="residential">Residential</option>
-            <option value="commercial">Commercial</option>
-            <option value="land">Land</option>
-            <option value="multi-family">Multi-Family</option>
-            <option value="any">Any</option>
-          </select>
-        </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Select label="Status" value={form.status} onChange={e => set('status', e.target.value as ClientStatus)}
+          options={[{ value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' }, { value: 'nurture', label: 'Nurture' }, { value: 'closed', label: 'Closed' }, { value: 'lost', label: 'Lost' }]} />
+        <Select label="Client Type" value={form.clientType} onChange={e => set('clientType', e.target.value as ClientType)}
+          options={[{ value: 'buyer', label: 'Buyer' }, { value: 'seller', label: 'Seller' }, { value: 'investor', label: 'Investor' }, { value: 'both', label: 'Buyer + Seller' }, { value: 'tenant', label: 'Tenant' }, { value: 'landlord', label: 'Landlord' }]} />
+        <Select label="Property Type" value={form.propertyType} onChange={e => set('propertyType', e.target.value as PropertyType)}
+          options={[{ value: 'residential', label: 'Residential' }, { value: 'commercial', label: 'Commercial' }, { value: 'land', label: 'Land' }, { value: 'multi-family', label: 'Multi-Family' }, { value: 'any', label: 'Any' }]} />
+        <Select label="Lead Temperature" value={form.leadTemperature} onChange={e => set('leadTemperature', e.target.value as LeadTemperature)}
+          options={[{ value: 'hot', label: '🔥 Hot' }, { value: 'warm', label: '🌡 Warm' }, { value: 'cold', label: '❄️ Cold' }]} />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
-          Budget Range (USD)
-        </label>
+        <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Budget Range (USD)</label>
         {errors.budget && <p className="text-xs text-red-500">{errors.budget}</p>}
         <div className="flex items-center gap-2">
-          <input
-            type="number"
-            className={selectClass}
-            placeholder="Min (e.g. 200000)"
-            value={form.budget.min || ''}
-            onChange={(e) => set('budget', { ...form.budget, min: Number(e.target.value) })}
-          />
-          <span className="text-slate-400">–</span>
-          <input
-            type="number"
-            className={selectClass}
-            placeholder="Max (e.g. 500000)"
-            value={form.budget.max || ''}
-            onChange={(e) => set('budget', { ...form.budget, max: Number(e.target.value) })}
-          />
+          <input type="number" className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Min" value={form.budget.min || ''} onChange={e => set('budget', { ...form.budget, min: Number(e.target.value) })} />
+          <span className="text-slate-400 text-sm">–</span>
+          <input type="number" className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Max" value={form.budget.max || ''} onChange={e => set('budget', { ...form.budget, max: Number(e.target.value) })} />
         </div>
       </div>
 
-      <TextInput
-        label="Location Preference"
-        value={form.locationPreference}
-        onChange={(e) => set('locationPreference', e.target.value)}
-        error={errors.locationPreference}
-        placeholder="e.g. Downtown Austin, TX"
-      />
+      <TextInput label="Location Preference" value={form.locationPreference} onChange={e => set('locationPreference', e.target.value)} error={errors.locationPreference} placeholder="e.g. Downtown Austin, TX" />
 
-      <TextInput
-        as="textarea"
-        label="Notes"
-        value={form.notes}
-        onChange={(e) => set('notes', e.target.value)}
-        placeholder="Any additional details about this client..."
-      />
+      <div className="grid grid-cols-2 gap-3">
+        <Select label="Lead Source" value={form.source ?? ''} onChange={e => set('source', e.target.value)}
+          options={[{ value: '', label: 'Unknown' }, { value: 'referral', label: 'Referral' }, { value: 'website', label: 'Website' }, { value: 'zillow', label: 'Zillow' }, { value: 'open_house', label: 'Open House' }, { value: 'cold_call', label: 'Cold Call' }]} />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Pre-Approved</label>
+          <div className="flex items-center gap-3 pt-1">
+            <label className="flex items-center gap-1.5 text-sm text-slate-700 cursor-pointer">
+              <input type="radio" checked={form.preApproved} onChange={() => set('preApproved', true)} /> Yes
+            </label>
+            <label className="flex items-center gap-1.5 text-sm text-slate-700 cursor-pointer">
+              <input type="radio" checked={!form.preApproved} onChange={() => set('preApproved', false)} /> No
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {form.preApproved && (
+        <TextInput label="Pre-Approval Amount ($)" type="number" value={form.preApprovalAmount ?? ''} onChange={e => set('preApprovalAmount', Number(e.target.value) || undefined)} placeholder="e.g. 500000" />
+      )}
+
+      <TextInput as="textarea" label="Notes" value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Any additional details..." />
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button>

@@ -1,0 +1,102 @@
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { User, DollarSign, Calendar, GripVertical } from 'lucide-react';
+import { cn, formatCurrency } from '../../lib/utils';
+import type { Deal } from '../../types';
+
+interface DealCardProps {
+  deal: Deal;
+  clientName?: string;
+  onClick?: () => void;
+  overlay?: boolean;
+}
+
+export function DealCard({ deal, clientName, onClick, overlay }: DealCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: deal.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const daysInStage = Math.floor(
+    (Date.now() - new Date(deal.updatedAt).getTime()) / 86400000
+  );
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        'bg-white rounded-xl border border-slate-100 shadow-sm group',
+        isDragging && !overlay && 'opacity-40',
+        overlay && 'shadow-xl rotate-1 scale-105',
+        'transition-shadow'
+      )}
+    >
+      {/* Drag handle + click area */}
+      <div className="flex items-start gap-1 p-3 pb-0">
+        <button
+          {...attributes}
+          {...listeners}
+          className="mt-0.5 p-0.5 rounded text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing shrink-0 touch-none"
+        >
+          <GripVertical size={13} />
+        </button>
+        <div className="flex-1 min-w-0 cursor-pointer" onClick={onClick}>
+          <p className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">{deal.title}</p>
+          {clientName && (
+            <div className="flex items-center gap-1 mt-1">
+              <User size={10} className="text-slate-400" />
+              <span className="text-xs text-slate-500 truncate">{clientName}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="px-3 pb-3 pt-2 space-y-2 cursor-pointer" onClick={onClick}>
+        {/* Value + commission */}
+        {deal.value && (
+          <div className="flex items-center gap-1">
+            <DollarSign size={11} className="text-slate-400" />
+            <span className="text-xs font-semibold text-slate-700">{formatCurrency(deal.value)}</span>
+            {deal.commissionPct && (
+              <span className="text-[10px] text-slate-400 ml-auto">
+                {formatCurrency(deal.value * deal.commissionPct / 100)} comm.
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Close date */}
+        {deal.closeDate && (
+          <div className="flex items-center gap-1">
+            <Calendar size={11} className="text-slate-400" />
+            <span className="text-xs text-slate-500">
+              Close {new Date(deal.closeDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </span>
+          </div>
+        )}
+
+        {/* Bottom row: tags + days in stage */}
+        <div className="flex items-center justify-between">
+          <div className="flex gap-1 flex-wrap">
+            {deal.tags.slice(0, 2).map(t => (
+              <span key={t} className="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded-full">{t}</span>
+            ))}
+          </div>
+          <span className={cn(
+            'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
+            daysInStage > 14 ? 'bg-red-50 text-red-500' :
+            daysInStage > 7  ? 'bg-amber-50 text-amber-600' :
+                               'bg-slate-50 text-slate-400'
+          )}>
+            {daysInStage}d
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -13,7 +13,7 @@ import { useActivityLog } from '../hooks/useActivityLog';
 import type { Client } from '../types';
 
 export function ClientsPage() {
-  const { open } = useSidebar();
+  const { openSidebar, openCommandPalette } = useSidebar();
   const { filteredClients, addClient, searchQuery, setSearchQuery, filters, setFilters } = useClients();
   const { entries } = useActivityLog();
   const [showModal, setShowModal] = useState(false);
@@ -38,7 +38,8 @@ export function ClientsPage() {
     <div className="flex flex-col flex-1">
       <TopBar
         title="Clients"
-        onMenuClick={open}
+        onMenuClick={openSidebar}
+        onSearchClick={openCommandPalette}
         actions={
           <Button onClick={() => setShowModal(true)} size="sm">
             <Plus size={14} />

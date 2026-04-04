@@ -1,4 +1,4 @@
-import { Phone, Mail, Calendar, FileText, Trash2 } from 'lucide-react';
+import { Phone, Mail, Calendar, FileText, MessageSquare, Trash2 } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { timeAgo, formatDate } from '../../lib/utils';
 import type { ActivityEntry } from '../../types';
@@ -8,6 +8,7 @@ const typeIcon = {
   email: Mail,
   meeting: Calendar,
   note: FileText,
+  sms: MessageSquare,
 };
 
 interface ActivityItemProps {
