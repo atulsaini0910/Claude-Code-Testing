@@ -18,6 +18,7 @@ import { useActivityLog } from '../hooks/useActivityLog';
 import { useDeals } from '../hooks/useDeals';
 import { useTasks } from '../hooks/useTasks';
 import { computeLeadScoreBreakdown } from '../lib/leadScoring';
+import { ClientSummaryCard } from '../components/clients/ClientSummaryCard';
 import { formatBudget, formatDate, formatCurrency, cn } from '../lib/utils';
 import type { Client } from '../types';
 import toast from 'react-hot-toast';
@@ -253,7 +254,7 @@ export function ClientDetailPage() {
               )}
             </div>
 
-            {/* Stats + Activity */}
+            {/* Stats + Activity + AI Summary */}
             <div className="lg:col-span-2">
               <Card className="p-5">
                 <div className="grid grid-cols-3 gap-4 mb-5 pb-4 border-b border-slate-100">
@@ -277,6 +278,8 @@ export function ClientDetailPage() {
                   onDelete={deleteEntry}
                 />
               </Card>
+
+              <ClientSummaryCard client={client} entries={entries} deals={clientDeals} />
             </div>
           </div>
         )}
