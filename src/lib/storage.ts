@@ -1,5 +1,5 @@
 import type {
-  Client, ActivityEntry, Deal, Property, Task, User, SavedView, Notification, Showing, UserGoals, AppSettings,
+  Client, ActivityEntry, Deal, Property, Task, User, SavedView, Notification, Showing, UserGoals, AppSettings, MarketData,
 } from '../types';
 
 // ─── Storage keys ─────────────────────────────────────────────────────────────
@@ -17,6 +17,7 @@ const KEYS = {
   showings:     'rt_showings',
   userGoals:    'rt_user_goals',
   settings:     'rt_settings',
+  marketData:   'rt_market_data',
 } as const;
 
 // ─── Generic helpers ──────────────────────────────────────────────────────────
@@ -49,6 +50,7 @@ export const db = {
   showings:      { get: () => read<Showing[]>(KEYS.showings, []),            set: (v: Showing[]) => write(KEYS.showings, v) },
   userGoals:     { get: () => read<UserGoals[]>(KEYS.userGoals, []),         set: (v: UserGoals[]) => write(KEYS.userGoals, v) },
   settings:      { get: () => read<AppSettings>(KEYS.settings, { theme: 'light' }), set: (v: AppSettings) => write(KEYS.settings, v) },
+  marketData:    { get: () => read<MarketData[]>(KEYS.marketData, []),              set: (v: MarketData[]) => write(KEYS.marketData, v) },
 };
 
 // Keep legacy keys working during transition

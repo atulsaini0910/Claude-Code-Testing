@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { TextInput } from '../ui/TextInput';
 import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
+import { RichTextEditor } from '../ui/RichTextEditor';
 import { useClients } from '../../hooks/useClients';
 import type { Client, PropertyType, ClientStatus, ClientType, LeadTemperature } from '../../types';
 
@@ -21,6 +22,7 @@ const defaultForm: FormData = {
   clientType: 'buyer', leadTemperature: 'warm', source: '',
   preApproved: false, preApprovalAmount: undefined,
   tags: [], score: 50, assignedTo: undefined, customFields: {},
+  lastContactedAt: undefined, nextActionDate: undefined,
 };
 
 export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
@@ -39,6 +41,8 @@ export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
           preApprovalAmount: initial.preApprovalAmount,
           tags: initial.tags ?? [], score: initial.score ?? 50,
           assignedTo: initial.assignedTo, customFields: initial.customFields ?? {},
+          lastContactedAt: initial.lastContactedAt,
+          nextActionDate: initial.nextActionDate,
         }
       : defaultForm
   );
@@ -144,7 +148,26 @@ export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
         <TextInput label="Pre-Approval Amount ($)" type="number" value={form.preApprovalAmount ?? ''} onChange={e => set('preApprovalAmount', Number(e.target.value) || undefined)} placeholder="e.g. 500000" />
       )}
 
-      <TextInput as="textarea" label="Notes" value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Any additional details..." />
+      <div className="flex flex-col gap-1">
+        <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Next Action Date</label>
+        <input
+          type="date"
+          className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          value={form.nextActionDate ? form.nextActionDate.slice(0, 10) : ''}
+          onChange={e => set('nextActionDate', e.target.value || undefined)}
+        />
+        <p className="text-[10px] text-slate-400">When should you next contact this client?</p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Notes</label>
+        <RichTextEditor
+          value={form.notes}
+          onChange={val => set('notes', val)}
+          placeholder="Any additional details…"
+          minHeight="80px"
+        />
+      </div>
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button>

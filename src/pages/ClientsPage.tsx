@@ -6,6 +6,7 @@ import { ClientFilters } from '../components/clients/ClientFilters';
 import { ClientForm } from '../components/clients/ClientForm';
 import { BulkActionBar } from '../components/clients/BulkActionBar';
 import { SavedViewChips } from '../components/clients/SavedViewChips';
+import { SaveViewPopover } from '../components/ui/SaveViewPopover';
 import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
@@ -13,6 +14,8 @@ import { useSidebar } from '../components/layout/AppShell';
 import { useClients } from '../hooks/useClients';
 import { useActivityLog } from '../hooks/useActivityLog';
 import { useBulkSelect } from '../hooks/useBulkSelect';
+import { useSavedViews } from '../hooks/useSavedViews';
+import { useUsers } from '../hooks/useUsers';
 import { exportClientsCSV } from '../lib/csvExport';
 import type { Client, ClientFilters as FiltersType, ClientStatus } from '../types';
 import toast from 'react-hot-toast';
@@ -36,6 +39,8 @@ export function ClientsPage() {
   }, [entries]);
 
   const bulk = useBulkSelect(filteredClients);
+  const { saveView } = useSavedViews();
+  const { currentUser } = useUsers();
 
   const handleAdd = (data: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) => {
     addClient(data);
@@ -85,6 +90,10 @@ export function ClientsPage() {
         onSearchClick={openCommandPalette}
         actions={
           <div className="flex items-center gap-2">
+            <SaveViewPopover onSave={(name, isShared) => {
+              saveView(name, 'clients', filters as unknown as Record<string, unknown>, currentUser?.id ?? 'u1', isShared);
+              toast.success(`View "${name}" saved`);
+            }} />
             <Button variant="secondary" size="sm" onClick={handleExportAll}>
               <Download size={13} /> Export
             </Button>

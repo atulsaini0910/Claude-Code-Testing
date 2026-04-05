@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { TextInput } from '../ui/TextInput';
 import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
+import { RichTextEditor } from '../ui/RichTextEditor';
 import type { Deal, DealStage, DealType } from '../../types';
 
 type FormData = Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>;
@@ -85,7 +86,15 @@ export function DealForm({ initial, clients, properties, defaultClientId, onSubm
 
       <TextInput label="Expected Close Date" type="date" value={form.closeDate ? form.closeDate.slice(0, 10) : ''} onChange={e => set('closeDate', e.target.value || undefined)} />
 
-      <TextInput as="textarea" label="Notes" value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Deal notes..." />
+      <div className="flex flex-col gap-1">
+        <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Notes</label>
+        <RichTextEditor
+          value={form.notes}
+          onChange={val => set('notes', val)}
+          placeholder="Deal notes…"
+          minHeight="80px"
+        />
+      </div>
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button>

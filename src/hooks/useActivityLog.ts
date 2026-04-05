@@ -13,8 +13,17 @@ export function useActivityLog() {
 
   const addEntry = useCallback(
     (data: Omit<ActivityEntry, 'id' | 'createdAt'>) => {
-      const entry: ActivityEntry = { ...data, id: uuidv4(), createdAt: new Date().toISOString() };
+      const now = new Date().toISOString();
+      const entry: ActivityEntry = { ...data, id: uuidv4(), createdAt: now };
       persist([...db.activity.get(), entry]);
+      // Stamp lastContactedAt on the linked client
+      const clients = db.clients.get();
+      const idx = clients.findIndex(c => c.id === data.clientId);
+      if (idx !== -1) {
+        const updated = [...clients];
+        updated[idx] = { ...updated[idx], lastContactedAt: now, updatedAt: now };
+        db.clients.set(updated);
+      }
     },
     [persist]
   );

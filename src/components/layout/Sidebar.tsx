@@ -2,20 +2,23 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Building2, X, Briefcase, Home,
   CheckSquare, BarChart2, Settings, ChevronDown, ChevronRight,
-  UserCog, FolderInput,
+  UserCog, FolderInput, Bookmark, Calendar, TrendingUp, Trash2,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import { useUsers } from '../../hooks/useUsers';
 import { useTasks } from '../../hooks/useTasks';
+import { useSavedViews } from '../../hooks/useSavedViews';
 
 const mainNav = [
   { to: '/dashboard',  label: 'Dashboard',      icon: LayoutDashboard },
   { to: '/clients',    label: 'Clients',         icon: Users },
   { to: '/deals',      label: 'Pipeline',        icon: Briefcase },
   { to: '/properties', label: 'Properties',      icon: Home },
+  { to: '/showings',   label: 'Showings',        icon: Calendar },
   { to: '/tasks',      label: 'Tasks',           icon: CheckSquare, badge: true },
   { to: '/analytics',  label: 'Analytics',       icon: BarChart2 },
+  { to: '/market',     label: 'Market Pulse',    icon: TrendingUp },
 ];
 
 const adminNav = [
@@ -32,7 +35,9 @@ interface SidebarProps {
 export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const { currentUser } = useUsers();
   const { overdueCt } = useTasks();
+  const { views, deleteView } = useSavedViews();
   const [adminOpen, setAdminOpen] = useState(false);
+  const [viewsOpen, setViewsOpen] = useState(false);
 
   return (
     <>
@@ -84,6 +89,46 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               )}
             </NavLink>
           ))}
+
+          {/* Saved views section */}
+          {views.length > 0 && (
+            <div className="pt-3">
+              <button
+                onClick={() => setViewsOpen(v => !v)}
+                className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5"><Bookmark size={11} /> Saved Views</span>
+                {viewsOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+              </button>
+              {viewsOpen && (
+                <div className="mt-0.5 space-y-0.5">
+                  {views.map(view => {
+                    const entityPath = view.entity === 'clients' ? '/clients' :
+                      view.entity === 'deals' ? '/deals' :
+                      view.entity === 'properties' ? '/properties' : '/tasks';
+                    return (
+                      <div key={view.id} className="flex items-center group">
+                        <NavLink
+                          to={entityPath}
+                          onClick={onClose}
+                          className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-800 truncate"
+                        >
+                          <Bookmark size={11} className="shrink-0 text-slate-400" />
+                          <span className="truncate">{view.name}</span>
+                        </NavLink>
+                        <button
+                          onClick={() => deleteView(view.id)}
+                          className="opacity-0 group-hover:opacity-100 p-1 mr-1 rounded hover:bg-red-50 text-slate-300 hover:text-red-400 cursor-pointer transition-opacity"
+                        >
+                          <Trash2 size={10} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Admin section */}
           <div className="pt-3">

@@ -2,19 +2,22 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Users, UserCheck, CheckSquare, TrendingUp, Briefcase, Activity,
-  ArrowRight, Flame, DollarSign, AlertCircle, Calendar,
+  ArrowRight, Flame, DollarSign, AlertCircle, Calendar, Lightbulb,
 } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
 import { StatCard } from '../components/ui/StatCard';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
+import { SuggestionCard } from '../components/dashboard/SuggestionCard';
 import { useSidebar } from '../components/layout/AppShell';
 import { useClients } from '../hooks/useClients';
 import { useDeals } from '../hooks/useDeals';
 import { useActivityLog } from '../hooks/useActivityLog';
 import { useTasks } from '../hooks/useTasks';
 import { useUsers } from '../hooks/useUsers';
+import { useShowings } from '../hooks/useShowings';
+import { computeSuggestions } from '../lib/suggestions';
 import { timeAgo, formatCurrency, cn } from '../lib/utils';
 
 const STAGE_LABEL: Record<string, string> = {
@@ -27,8 +30,9 @@ export function DashboardPage() {
   const { clients } = useClients();
   const { deals, pipelineValue } = useDeals();
   const { entries } = useActivityLog();
-  const { groupedTasks } = useTasks();
+  const { groupedTasks, tasks } = useTasks();
   const { currentUser } = useUsers();
+  const { showings } = useShowings();
 
   const now = new Date();
 
@@ -99,6 +103,10 @@ export function DashboardPage() {
       .reduce((s, d) => s + ((d.value ?? 0) * (d.commissionPct ?? 0)) / 100, 0);
   }, [deals, now]);
 
+  const suggestions = useMemo(() =>
+    computeSuggestions(clients, deals, tasks, showings, entries),
+  [clients, deals, tasks, showings, entries]);
+
   const greeting = currentUser ? `Welcome back, ${currentUser.name.split(' ')[0]}` : 'Dashboard';
 
   return (
@@ -106,6 +114,25 @@ export function DashboardPage() {
       <TopBar title={greeting} onMenuClick={openSidebar} onSearchClick={openCommandPalette} />
 
       <div className="flex-1 p-4 md:p-6 space-y-5 overflow-y-auto">
+
+        {/* AI Suggestions */}
+        {suggestions.length > 0 && (
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Lightbulb size={14} className="text-amber-500" />
+              <h2 className="text-sm font-semibold text-slate-800">Suggested Actions</h2>
+              <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-semibold ml-auto">
+                {suggestions.length} action{suggestions.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {suggestions.map(s => (
+                <SuggestionCard key={s.id} suggestion={s} />
+              ))}
+            </div>
+          </Card>
+        )}
+
         {/* KPI row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total Clients" value={stats.total} icon={<Users size={18} />} color="text-indigo-600" />

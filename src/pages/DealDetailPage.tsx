@@ -20,7 +20,10 @@ import { useActivityLog } from '../hooks/useActivityLog';
 import { useTasks } from '../hooks/useTasks';
 import { useShowings } from '../hooks/useShowings';
 import { useUsers } from '../hooks/useUsers';
+import { usePermissions } from '../hooks/usePermissions';
 import { STAGE_CHECKLISTS } from '../lib/stageChecklists';
+import { TransactionTimeline } from '../components/deals/TransactionTimeline';
+import type { TransactionDates } from '../types';
 import { formatCurrency, formatDate, cn } from '../lib/utils';
 import type { Deal, DealStage } from '../types';
 import toast from 'react-hot-toast';
@@ -55,6 +58,7 @@ export function DealDetailPage() {
   const { tasks, addTask, completeTask } = useTasks();
   const { showings, addShowing, updateShowing } = useShowings();
   const { getUserName } = useUsers();
+  const { canDelete } = usePermissions();
 
   const [showEdit, setShowEdit] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -151,9 +155,11 @@ export function DealDetailPage() {
             <Button variant="secondary" size="sm" onClick={() => setShowEdit(true)}>
               <Edit2 size={14} /> Edit
             </Button>
-            <Button variant="danger" size="sm" onClick={() => setConfirmDelete(true)}>
-              <Trash2 size={14} />
-            </Button>
+            {canDelete && (
+              <Button variant="danger" size="sm" onClick={() => setConfirmDelete(true)}>
+                <Trash2 size={14} />
+              </Button>
+            )}
           </div>
         }
       />
@@ -360,6 +366,19 @@ export function DealDetailPage() {
               </div>
             </Card>
           </div>
+        )}
+
+        {/* Transaction Timeline — shown in overview for under_contract deals */}
+        {tab === 'overview' && deal.stage === 'under_contract' && (
+          <Card className="p-5">
+            <TransactionTimeline
+              dates={deal.transactionDates ?? {}}
+              onChange={(key, value) => {
+                const updated: TransactionDates = { ...(deal.transactionDates ?? {}), [key]: value };
+                updateDeal(deal.id, { transactionDates: updated });
+              }}
+            />
+          </Card>
         )}
 
         {/* TAB: Activity */}

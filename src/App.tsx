@@ -13,6 +13,8 @@ import { AnalyticsPage } from './pages/AnalyticsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { TeamPage } from './pages/TeamPage';
 import { ImportPage } from './pages/ImportPage';
+import { ShowingsPage } from './pages/ShowingsPage';
+import { MarketPage } from './pages/MarketPage';
 import { db } from './lib/storage';
 
 export default function App() {
@@ -42,6 +44,8 @@ export default function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/admin/team" element={<TeamPage />} />
         <Route path="/admin/import" element={<ImportPage />} />
+        <Route path="/showings" element={<ShowingsPage />} />
+        <Route path="/market" element={<MarketPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </AppShell>

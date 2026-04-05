@@ -25,7 +25,8 @@ interface ClientCardProps {
 
 export function ClientCard({ client, lastActivity, selected, onSelect }: ClientCardProps) {
   const navigate = useNavigate();
-  const days = lastActivity ? daysSince(lastActivity.createdAt) : null;
+  const contactSource = client.lastContactedAt ?? lastActivity?.createdAt ?? null;
+  const days = contactSource ? daysSince(contactSource) : null;
 
   const followUpStatus = days === null ? 'none'
     : days <= 7 ? 'fresh'
@@ -37,6 +38,9 @@ export function ClientCard({ client, lastActivity, selected, onSelect }: ClientC
     : followUpStatus === 'due'
     ? { label: `${days}d ago`, cls: 'bg-amber-100 text-amber-700', icon: <Clock size={9} /> }
     : null;
+
+  const nextActionOverdue = client.nextActionDate &&
+    new Date(client.nextActionDate).getTime() < Date.now();
 
   return (
     <Card
@@ -112,13 +116,21 @@ export function ClientCard({ client, lastActivity, selected, onSelect }: ClientC
           <span className="text-[10px] text-slate-300">No activity yet</span>
         )}
 
-        {/* Days since contact badge */}
-        {followUpBadge && (
-          <span className={cn('inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full shrink-0', followUpBadge.cls)}>
-            {followUpBadge.icon}
-            {followUpBadge.label}
-          </span>
-        )}
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Next action overdue indicator */}
+          {nextActionOverdue && (
+            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700">
+              Action due
+            </span>
+          )}
+          {/* Days since contact badge */}
+          {followUpBadge && (
+            <span className={cn('inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full', followUpBadge.cls)}>
+              {followUpBadge.icon}
+              {followUpBadge.label}
+            </span>
+          )}
+        </div>
       </div>
     </Card>
   );

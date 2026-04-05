@@ -42,6 +42,9 @@ export interface Client {
   score: number;
   assignedTo?: string;
   customFields: Record<string, unknown>;
+  // Follow-up tracking
+  lastContactedAt?: string;
+  nextActionDate?: string;
 }
 
 export interface ActivityEntry {
@@ -54,6 +57,14 @@ export interface ActivityEntry {
   dealId?: string;
   propertyId?: string;
   durationMin?: number;
+}
+
+export interface TransactionDates {
+  inspectionDeadline?: string;
+  financingContingency?: string;
+  appraisalDeadline?: string;
+  titleClearance?: string;
+  closingDate?: string;
 }
 
 export interface Deal {
@@ -69,6 +80,7 @@ export interface Deal {
   lossReason?: string;
   notes: string;
   stageHistory?: { stage: DealStage; enteredAt: string }[];
+  transactionDates?: TransactionDates;
   assignedTo?: string;
   tags: string[];
   createdAt: string;
@@ -168,6 +180,27 @@ export interface UserGoals {
 
 export interface AppSettings {
   theme: 'light' | 'dark';
+}
+
+export interface MarketData {
+  id: string;
+  area: string;
+  month: string; // YYYY-MM
+  medianPrice: number;
+  daysOnMarket: number;
+  listToSaleRatio: number; // e.g. 0.97 = 97%
+  inventory: number;
+  createdAt: string;
+}
+
+export interface Suggestion {
+  id: string;
+  title: string;
+  body: string;
+  urgency: 'high' | 'medium' | 'low';
+  entityType: 'client' | 'deal' | 'showing' | 'task';
+  entityId: string;
+  actionType: 'navigate' | 'call' | 'log_activity';
 }
 
 // ─── Filter shapes ─────────────────────────────────────────────────────────────
