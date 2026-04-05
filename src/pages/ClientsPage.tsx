@@ -1,22 +1,28 @@
 import { useState, useMemo } from 'react';
-import { Search, Plus, Users } from 'lucide-react';
+import { Search, Plus, Users, Download } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
 import { ClientCard } from '../components/clients/ClientCard';
 import { ClientFilters } from '../components/clients/ClientFilters';
 import { ClientForm } from '../components/clients/ClientForm';
+import { BulkActionBar } from '../components/clients/BulkActionBar';
+import { SavedViewChips } from '../components/clients/SavedViewChips';
 import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useSidebar } from '../components/layout/AppShell';
 import { useClients } from '../hooks/useClients';
 import { useActivityLog } from '../hooks/useActivityLog';
-import type { Client } from '../types';
+import { useBulkSelect } from '../hooks/useBulkSelect';
+import { exportClientsCSV } from '../lib/csvExport';
+import type { Client, ClientFilters as FiltersType, ClientStatus } from '../types';
+import toast from 'react-hot-toast';
 
 export function ClientsPage() {
   const { openSidebar, openCommandPalette } = useSidebar();
-  const { filteredClients, addClient, searchQuery, setSearchQuery, filters, setFilters } = useClients();
+  const { filteredClients, addClient, updateClient, deleteClient, searchQuery, setSearchQuery, filters, setFilters } = useClients();
   const { entries } = useActivityLog();
   const [showModal, setShowModal] = useState(false);
+  const [activeSegment, setActiveSegment] = useState<string | null>(null);
 
   const lastActivityMap = useMemo(() => {
     const map = new Map<string, typeof entries[number]>();
@@ -29,9 +35,46 @@ export function ClientsPage() {
     return map;
   }, [entries]);
 
+  const bulk = useBulkSelect(filteredClients);
+
   const handleAdd = (data: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) => {
     addClient(data);
     setShowModal(false);
+    toast.success('Client added');
+  };
+
+  const handleSegmentSelect = (segmentId: string, segmentFilters: Partial<FiltersType>) => {
+    if (activeSegment === segmentId) {
+      setActiveSegment(null);
+      setFilters({ status: 'all', clientType: 'all', leadTemperature: 'all' });
+    } else {
+      setActiveSegment(segmentId);
+      setFilters(segmentFilters);
+    }
+    bulk.clearAll();
+  };
+
+  const handleBulkChangeStatus = (status: ClientStatus) => {
+    bulk.selectedItems.forEach(c => updateClient(c.id, { status }));
+    toast.success(`${bulk.selectedItems.length} clients updated to ${status}`);
+    bulk.clearAll();
+  };
+
+  const handleBulkDelete = () => {
+    if (!confirm(`Delete ${bulk.selectedItems.length} clients? This cannot be undone.`)) return;
+    bulk.selectedItems.forEach(c => deleteClient(c.id));
+    toast.success(`${bulk.selectedItems.length} clients deleted`);
+    bulk.clearAll();
+  };
+
+  const handleBulkExport = () => {
+    exportClientsCSV(bulk.selectedItems);
+    toast.success(`Exported ${bulk.selectedItems.length} clients`);
+  };
+
+  const handleExportAll = () => {
+    exportClientsCSV(filteredClients);
+    toast.success(`Exported ${filteredClients.length} clients`);
   };
 
   return (
@@ -41,14 +84,21 @@ export function ClientsPage() {
         onMenuClick={openSidebar}
         onSearchClick={openCommandPalette}
         actions={
-          <Button onClick={() => setShowModal(true)} size="sm">
-            <Plus size={14} />
-            Add Client
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" onClick={handleExportAll}>
+              <Download size={13} /> Export
+            </Button>
+            <Button onClick={() => setShowModal(true)} size="sm">
+              <Plus size={14} /> Add Client
+            </Button>
+          </div>
         }
       />
 
-      <div className="flex-1 p-4 md:p-6 space-y-4">
+      <div className="flex-1 p-4 md:p-6 space-y-4 overflow-y-auto">
+        {/* Smart Segments */}
+        <SavedViewChips activeSegment={activeSegment} onSelect={handleSegmentSelect} />
+
         {/* Search + Filters */}
         <div className="space-y-3">
           <div className="relative">
@@ -64,10 +114,21 @@ export function ClientsPage() {
           <ClientFilters filters={filters} setFilters={setFilters} />
         </div>
 
-        {/* Count */}
-        <p className="text-xs text-slate-400">
-          {filteredClients.length} client{filteredClients.length !== 1 ? 's' : ''} found
-        </p>
+        {/* Count + bulk select all */}
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-slate-400">
+            {filteredClients.length} client{filteredClients.length !== 1 ? 's' : ''}
+            {bulk.someSelected && <span className="text-indigo-600 font-medium"> · {bulk.selectedIds.size} selected</span>}
+          </p>
+          {filteredClients.length > 0 && (
+            <button
+              onClick={bulk.allSelected ? bulk.clearAll : bulk.selectAll}
+              className="text-xs text-indigo-600 hover:underline cursor-pointer"
+            >
+              {bulk.allSelected ? 'Deselect all' : 'Select all'}
+            </button>
+          )}
+        </div>
 
         {/* Grid */}
         {filteredClients.length === 0 ? (
@@ -84,17 +145,28 @@ export function ClientsPage() {
             }
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
             {filteredClients.map((client) => (
               <ClientCard
                 key={client.id}
                 client={client}
                 lastActivity={lastActivityMap.get(client.id) ?? null}
+                selected={bulk.isSelected(client.id)}
+                onSelect={bulk.toggle}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Bulk action bar */}
+      <BulkActionBar
+        selectedItems={bulk.selectedItems}
+        onClearAll={bulk.clearAll}
+        onChangeStatus={handleBulkChangeStatus}
+        onExport={handleBulkExport}
+        onDelete={handleBulkDelete}
+      />
 
       {showModal && (
         <Modal title="Add New Client" onClose={() => setShowModal(false)}>

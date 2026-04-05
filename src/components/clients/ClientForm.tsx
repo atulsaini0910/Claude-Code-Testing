@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { TextInput } from '../ui/TextInput';
 import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
+import { useClients } from '../../hooks/useClients';
 import type { Client, PropertyType, ClientStatus, ClientType, LeadTemperature } from '../../types';
 
 type FormData = Omit<Client, 'id' | 'createdAt' | 'updatedAt'>;
@@ -21,6 +24,8 @@ const defaultForm: FormData = {
 };
 
 export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
+  const { clients } = useClients();
+
   const [form, setForm] = useState<FormData>(
     initial
       ? {
@@ -38,6 +43,20 @@ export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
       : defaultForm
   );
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+
+  // Duplicate detection
+  const duplicates = useMemo(() => {
+    if (!form.name.trim() && !form.email.trim() && !form.phone.trim()) return [];
+    return clients.filter(c => {
+      if (initial && c.id === initial.id) return false;
+      const nameMatch = form.name.trim().length > 2 &&
+        c.name.toLowerCase().includes(form.name.trim().toLowerCase().slice(0, 6));
+      const emailMatch = form.email.trim() && c.email.toLowerCase() === form.email.trim().toLowerCase();
+      const phoneMatch = form.phone.trim().length > 6 &&
+        c.phone.replace(/\D/g, '').includes(form.phone.replace(/\D/g, '').slice(0, 7));
+      return emailMatch || phoneMatch || nameMatch;
+    }).slice(0, 2);
+  }, [form.name, form.email, form.phone, clients, initial]);
 
   const set = <K extends keyof FormData>(key: K, value: FormData[K]) =>
     setForm(prev => ({ ...prev, [key]: value }));
@@ -60,6 +79,22 @@ export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Duplicate detection warning */}
+      {duplicates.length > 0 && (
+        <div className="flex gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <AlertTriangle size={15} className="text-amber-500 shrink-0 mt-0.5" />
+          <div className="text-xs text-amber-800">
+            <p className="font-semibold mb-1">Possible duplicate{duplicates.length > 1 ? 's' : ''} found:</p>
+            {duplicates.map(d => (
+              <Link key={d.id} to={`/clients/${d.id}`} target="_blank"
+                className="flex items-center gap-1 hover:underline text-amber-700">
+                <ExternalLink size={10} /> {d.name} — {d.email}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <TextInput label="Full Name" value={form.name} onChange={e => set('name', e.target.value)} error={errors.name} placeholder="Jane Smith" className="sm:col-span-2" />
         <TextInput label="Phone" type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} error={errors.phone} placeholder="(555) 000-0000" />

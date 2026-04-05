@@ -201,7 +201,7 @@ export function AnalyticsPage() {
           </div>
         </Card>
 
-        {/* Client status */}
+        {/* Client status + Win/Loss */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card className="p-5">
             <h3 className="text-sm font-semibold text-slate-800 mb-4">Client Status Breakdown</h3>
@@ -226,7 +226,7 @@ export function AnalyticsPage() {
                 { label: 'Pre-approved clients', value: clients.filter(c => c.preApproved).length, color: 'text-emerald-600' },
                 { label: 'Deals in offer stage', value: deals.filter(d => d.stage === 'offer').length, color: 'text-amber-600' },
                 { label: 'Overdue tasks', value: groupedTasks.overdue.length, color: groupedTasks.overdue.length > 0 ? 'text-red-500' : 'text-slate-500' },
-                { label: 'Available properties', value: deals.length > 0 ? deals.filter(d => d.propertyId).length : 0, color: 'text-indigo-600' },
+                { label: 'Win rate (closed deals)', value: (() => { const total = deals.filter(d => d.stage === 'closed_won' || d.stage === 'closed_lost').length; return total > 0 ? `${Math.round((deals.filter(d => d.stage === 'closed_won').length / total) * 100)}%` : '—'; })(), color: 'text-indigo-600' },
               ].map(s => (
                 <div key={s.label} className="flex items-center justify-between">
                   <span className="text-sm text-slate-600">{s.label}</span>
@@ -236,6 +236,69 @@ export function AnalyticsPage() {
             </div>
           </Card>
         </div>
+
+        {/* Pipeline velocity */}
+        <Card className="p-5">
+          <h3 className="text-sm font-semibold text-slate-800 mb-4">Pipeline Stage Velocity (avg days per stage)</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {(['inquiry', 'showing', 'offer', 'under_contract'] as const).map(stage => {
+              const stageDeals = deals.filter(d => d.stageHistory && d.stageHistory.length > 1);
+              const avgDays = stageDeals.length > 0
+                ? (() => {
+                    const times: number[] = [];
+                    stageDeals.forEach(d => {
+                      const hist = d.stageHistory!;
+                      const idx = hist.findIndex(h => h.stage === stage);
+                      if (idx >= 0 && idx < hist.length - 1) {
+                        const ms = new Date(hist[idx + 1].enteredAt).getTime() - new Date(hist[idx].enteredAt).getTime();
+                        times.push(ms / 86400000);
+                      }
+                    });
+                    return times.length > 0 ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : null;
+                  })()
+                : null;
+              const STAGE_LABELS2: Record<string, string> = { inquiry: 'Inquiry', showing: 'Showing', offer: 'Offer', under_contract: 'Under Contract' };
+              return (
+                <div key={stage} className="bg-slate-50 rounded-xl p-3 text-center">
+                  <p className="text-xs text-slate-500 mb-1">{STAGE_LABELS2[stage]}</p>
+                  <p className="text-2xl font-bold text-slate-800">{avgDays ?? '—'}</p>
+                  <p className="text-[10px] text-slate-400">avg days</p>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+        {/* Win/Loss analysis */}
+        <Card className="p-5">
+          <h3 className="text-sm font-semibold text-slate-800 mb-4">Win / Loss Analysis</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-emerald-50 rounded-xl p-4 text-center">
+              <p className="text-3xl font-bold text-emerald-700">{deals.filter(d => d.stage === 'closed_won').length}</p>
+              <p className="text-xs text-emerald-600 font-medium mt-1">Deals Won</p>
+              <p className="text-xs text-slate-400 mt-0.5">{formatCurrency(deals.filter(d => d.stage === 'closed_won').reduce((s, d) => s + ((d.value ?? 0) * (d.commissionPct ?? 0) / 100), 0))} commission</p>
+            </div>
+            <div className="bg-red-50 rounded-xl p-4 text-center">
+              <p className="text-3xl font-bold text-red-600">{deals.filter(d => d.stage === 'closed_lost').length}</p>
+              <p className="text-xs text-red-600 font-medium mt-1">Deals Lost</p>
+              <p className="text-xs text-slate-400 mt-0.5">{deals.filter(d => d.stage === 'closed_lost').reduce((s, d) => s + (d.value ?? 0), 0) > 0 ? formatCurrency(deals.filter(d => d.stage === 'closed_lost').reduce((s, d) => s + (d.value ?? 0), 0)) + ' potential' : 'No value logged'}</p>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-4 text-center">
+              {(() => {
+                const total = deals.filter(d => d.stage === 'closed_won' || d.stage === 'closed_lost').length;
+                const won = deals.filter(d => d.stage === 'closed_won').length;
+                const rate = total > 0 ? Math.round((won / total) * 100) : 0;
+                return (
+                  <>
+                    <p className="text-3xl font-bold text-slate-800">{rate}%</p>
+                    <p className="text-xs text-slate-600 font-medium mt-1">Win Rate</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{total} closed deals total</p>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
   );

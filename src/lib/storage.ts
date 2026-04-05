@@ -1,5 +1,5 @@
 import type {
-  Client, ActivityEntry, Deal, Property, Task, User, SavedView, Notification,
+  Client, ActivityEntry, Deal, Property, Task, User, SavedView, Notification, Showing, UserGoals, AppSettings,
 } from '../types';
 
 // ─── Storage keys ─────────────────────────────────────────────────────────────
@@ -14,6 +14,9 @@ const KEYS = {
   savedViews:   'rt_saved_views',
   notifications:'rt_notifications',
   currentUser:  'rt_current_user',
+  showings:     'rt_showings',
+  userGoals:    'rt_user_goals',
+  settings:     'rt_settings',
 } as const;
 
 // ─── Generic helpers ──────────────────────────────────────────────────────────
@@ -43,6 +46,9 @@ export const db = {
   savedViews:    { get: () => read<SavedView[]>(KEYS.savedViews, []),       set: (v: SavedView[]) => write(KEYS.savedViews, v) },
   notifications: { get: () => read<Notification[]>(KEYS.notifications, []),set: (v: Notification[]) => write(KEYS.notifications, v) },
   currentUser:   { get: () => read<User | null>(KEYS.currentUser, null),    set: (v: User | null) => write(KEYS.currentUser, v) },
+  showings:      { get: () => read<Showing[]>(KEYS.showings, []),            set: (v: Showing[]) => write(KEYS.showings, v) },
+  userGoals:     { get: () => read<UserGoals[]>(KEYS.userGoals, []),         set: (v: UserGoals[]) => write(KEYS.userGoals, v) },
+  settings:      { get: () => read<AppSettings>(KEYS.settings, { theme: 'light' }), set: (v: AppSettings) => write(KEYS.settings, v) },
 };
 
 // Keep legacy keys working during transition
@@ -177,6 +183,11 @@ export function initSeedData(): void {
       type: 'purchase', stage: 'offer', value: 595000, commissionPct: 3,
       closeDate: new Date(now.getTime() + 30 * 86400000).toISOString(),
       notes: 'Offer submitted. Waiting for counter.', assignedTo: 'u1', tags: ['hot'],
+      stageHistory: [
+        { stage: 'inquiry', enteredAt: daysAgo(10) },
+        { stage: 'showing', enteredAt: daysAgo(7) },
+        { stage: 'offer', enteredAt: daysAgo(2) },
+      ],
       createdAt: daysAgo(10), updatedAt: daysAgo(2),
     },
     {
@@ -184,6 +195,10 @@ export function initSeedData(): void {
       type: 'purchase', stage: 'showing', value: 1850000, commissionPct: 2.5,
       closeDate: new Date(now.getTime() + 60 * 86400000).toISOString(),
       notes: 'Site visit done. Parking concern needs resolution.', assignedTo: 'u2', tags: [],
+      stageHistory: [
+        { stage: 'inquiry', enteredAt: daysAgo(8) },
+        { stage: 'showing', enteredAt: daysAgo(1) },
+      ],
       createdAt: daysAgo(8), updatedAt: daysAgo(1),
     },
     {
@@ -191,6 +206,7 @@ export function initSeedData(): void {
       type: 'purchase', stage: 'inquiry', value: 1200000, commissionPct: 2.5,
       closeDate: new Date(now.getTime() + 90 * 86400000).toISOString(),
       notes: 'Pulling MLS data for qualifying properties.', assignedTo: 'u1', tags: ['investor'],
+      stageHistory: [{ stage: 'inquiry', enteredAt: daysAgo(5) }],
       createdAt: daysAgo(5), updatedAt: daysAgo(3),
     },
     {
@@ -198,6 +214,13 @@ export function initSeedData(): void {
       type: 'purchase', stage: 'closed_won', value: 635000, commissionPct: 3,
       closeDate: daysAgo(5),
       notes: 'Deal closed. Keys handed over.', assignedTo: 'u2', tags: [],
+      stageHistory: [
+        { stage: 'inquiry', enteredAt: daysAgo(80) },
+        { stage: 'showing', enteredAt: daysAgo(60) },
+        { stage: 'offer', enteredAt: daysAgo(30) },
+        { stage: 'under_contract', enteredAt: daysAgo(20) },
+        { stage: 'closed_won', enteredAt: daysAgo(5) },
+      ],
       createdAt: daysAgo(80), updatedAt: daysAgo(5),
     },
     {
@@ -205,6 +228,10 @@ export function initSeedData(): void {
       type: 'purchase', stage: 'showing', value: 475000, commissionPct: 3,
       closeDate: new Date(now.getTime() + 45 * 86400000).toISOString(),
       notes: 'Scheduled second showing for this weekend.', assignedTo: 'u1', tags: ['VIP'],
+      stageHistory: [
+        { stage: 'inquiry', enteredAt: daysAgo(3) },
+        { stage: 'showing', enteredAt: daysAgo(1) },
+      ],
       createdAt: daysAgo(3), updatedAt: daysAgo(1),
     },
     {
@@ -212,6 +239,12 @@ export function initSeedData(): void {
       type: 'purchase', stage: 'under_contract', value: 280000, commissionPct: 3,
       closeDate: new Date(now.getTime() + 20 * 86400000).toISOString(),
       notes: 'Under contract, title search in progress.', assignedTo: 'u3', tags: [],
+      stageHistory: [
+        { stage: 'inquiry', enteredAt: daysAgo(12) },
+        { stage: 'showing', enteredAt: daysAgo(9) },
+        { stage: 'offer', enteredAt: daysAgo(5) },
+        { stage: 'under_contract', enteredAt: daysAgo(1) },
+      ],
       createdAt: daysAgo(12), updatedAt: daysAgo(1),
     },
   ];
@@ -274,6 +307,18 @@ export function initSeedData(): void {
     { id: 'n3', type: 'client_assigned', title: 'New client assigned to you', body: 'Marcus Bell — Houston Medical Center', entityType: 'client', entityId: 'c8', isRead: true, createdAt: daysAgo(2) },
   ];
 
+  const showings: import('../types').Showing[] = [
+    { id: 's1', dealId: 'd1', clientId: 'c1', propertyId: 'p1', scheduledAt: daysAgo(14), status: 'completed', feedback: 'loved', agentNotes: 'Client loved the backyard and kitchen. Very enthusiastic.', createdAt: daysAgo(14) },
+    { id: 's2', dealId: 'd2', clientId: 'c2', propertyId: 'p2', scheduledAt: daysAgo(1), status: 'completed', feedback: 'liked', agentNotes: 'Good layout but parking is a major concern for James.', createdAt: daysAgo(1) },
+    { id: 's3', dealId: 'd5', clientId: 'c7', propertyId: 'p3', scheduledAt: new Date(now.getTime() + 2 * 86400000).toISOString(), status: 'scheduled', feedback: undefined, agentNotes: '', createdAt: daysAgo(1) },
+  ];
+
+  const userGoals: import('../types').UserGoals[] = [
+    { userId: 'u1', month: now.toISOString().slice(0, 7), closingsGoal: 4, revenueGoal: 60000, activitiesGoal: 50 },
+    { userId: 'u2', month: now.toISOString().slice(0, 7), closingsGoal: 3, revenueGoal: 45000, activitiesGoal: 40 },
+    { userId: 'u3', month: now.toISOString().slice(0, 7), closingsGoal: 2, revenueGoal: 25000, activitiesGoal: 30 },
+  ];
+
   db.users.set(users);
   db.clients.set(clients);
   db.properties.set(properties);
@@ -281,5 +326,7 @@ export function initSeedData(): void {
   db.tasks.set(tasks);
   db.activity.set(activity);
   db.notifications.set(notifications);
+  db.showings.set(showings);
+  db.userGoals.set(userGoals);
   db.currentUser.set(users[0]); // Default to Alex Rivera (admin)
 }

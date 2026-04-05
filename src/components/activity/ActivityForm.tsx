@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { TextInput } from '../ui/TextInput';
+import { ACTIVITY_TEMPLATES } from '../../lib/activityTemplates';
 import type { ActivityType } from '../../types';
 
 interface ActivityFormProps {
@@ -17,6 +19,18 @@ export function ActivityForm({ clientId, onSubmit, onCancel }: ActivityFormProps
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [error, setError] = useState('');
+  const [showTemplates, setShowTemplates] = useState(false);
+
+  const filteredTemplates = ACTIVITY_TEMPLATES.filter(t => t.type === type);
+
+  const applyTemplate = (templateId: string) => {
+    const t = ACTIVITY_TEMPLATES.find(t => t.id === templateId);
+    if (t) {
+      setTitle(t.title);
+      setBody(t.body);
+    }
+    setShowTemplates(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,19 +46,63 @@ export function ActivityForm({ clientId, onSubmit, onCancel }: ActivityFormProps
 
   return (
     <form onSubmit={handleSubmit} className="bg-slate-50 rounded-xl p-4 space-y-3 border border-slate-100">
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Type</label>
-        <select
-          className={selectClass}
-          value={type}
-          onChange={(e) => setType(e.target.value as ActivityType)}
-        >
-          <option value="call">Call</option>
-          <option value="meeting">Meeting</option>
-          <option value="email">Email</option>
-          <option value="note">Note</option>
-        </select>
+      <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-1 flex-1">
+          <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Type</label>
+          <select
+            className={selectClass}
+            value={type}
+            onChange={(e) => { setType(e.target.value as ActivityType); setShowTemplates(false); }}
+          >
+            <option value="call">Call</option>
+            <option value="meeting">Meeting</option>
+            <option value="email">Email</option>
+            <option value="note">Note</option>
+            <option value="sms">SMS</option>
+          </select>
+        </div>
+
+        {/* Templates button */}
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide invisible">.</label>
+          <button
+            type="button"
+            onClick={() => setShowTemplates(v => !v)}
+            className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer font-medium"
+          >
+            <Sparkles size={12} /> Templates
+          </button>
+        </div>
       </div>
+
+      {/* Template picker */}
+      {showTemplates && (
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide px-3 py-2 border-b border-slate-100">
+            {filteredTemplates.length > 0 ? 'Click to apply' : `No ${type} templates`}
+          </p>
+          {filteredTemplates.map(t => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => applyTemplate(t.id)}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors cursor-pointer border-b border-slate-50 last:border-0"
+            >
+              {t.label}
+            </button>
+          ))}
+          {ACTIVITY_TEMPLATES.filter(t => t.type !== type).length > 0 && filteredTemplates.length === 0 && (
+            <button
+              type="button"
+              onClick={() => {}}
+              className="w-full text-left px-3 py-2 text-xs text-slate-400"
+            >
+              Switch type to see more templates
+            </button>
+          )}
+        </div>
+      )}
+
       <TextInput
         label="Title"
         value={title}

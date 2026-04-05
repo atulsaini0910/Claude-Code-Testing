@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { Phone, Mail, MapPin, Clock, Flame, Thermometer, Snowflake } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Flame, Thermometer, Snowflake, AlertCircle, CheckSquare } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { formatBudget, timeAgo } from '../../lib/utils';
+import { cn } from '../../lib/utils';
 import type { Client, ActivityEntry } from '../../types';
 
 const tempIcon = {
@@ -11,17 +12,51 @@ const tempIcon = {
   cold: <Snowflake size={11} className="text-blue-400" />,
 };
 
+function daysSince(isoDate: string): number {
+  return Math.floor((Date.now() - new Date(isoDate).getTime()) / 86400000);
+}
+
 interface ClientCardProps {
   client: Client;
   lastActivity: ActivityEntry | null;
+  selected?: boolean;
+  onSelect?: (id: string) => void;
 }
 
-export function ClientCard({ client, lastActivity }: ClientCardProps) {
+export function ClientCard({ client, lastActivity, selected, onSelect }: ClientCardProps) {
   const navigate = useNavigate();
+  const days = lastActivity ? daysSince(lastActivity.createdAt) : null;
+
+  const followUpStatus = days === null ? 'none'
+    : days <= 7 ? 'fresh'
+    : days <= 21 ? 'due'
+    : 'overdue';
+
+  const followUpBadge = followUpStatus === 'overdue'
+    ? { label: `${days}d ago`, cls: 'bg-red-100 text-red-600', icon: <AlertCircle size={9} /> }
+    : followUpStatus === 'due'
+    ? { label: `${days}d ago`, cls: 'bg-amber-100 text-amber-700', icon: <Clock size={9} /> }
+    : null;
 
   return (
-    <Card onClick={() => navigate(`/clients/${client.id}`)} className="p-4">
-      <div className="flex items-start justify-between mb-2.5">
+    <Card
+      onClick={() => navigate(`/clients/${client.id}`)}
+      className={cn('p-4 relative', selected && 'ring-2 ring-indigo-400')}
+    >
+      {/* Checkbox for bulk select */}
+      {onSelect && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onSelect(client.id); }}
+          className="absolute top-3 left-3 z-10 cursor-pointer"
+        >
+          <CheckSquare
+            size={15}
+            className={selected ? 'text-indigo-600' : 'text-slate-300 hover:text-slate-400'}
+          />
+        </button>
+      )}
+
+      <div className={cn('flex items-start justify-between mb-2.5', onSelect && 'pl-5')}>
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
             <h3 className="font-semibold text-slate-800 text-sm leading-tight truncate">{client.name}</h3>
@@ -66,13 +101,25 @@ export function ClientCard({ client, lastActivity }: ClientCardProps) {
         </div>
       )}
 
-      {lastActivity && (
-        <div className="pt-2 border-t border-slate-50 flex items-center gap-1 text-[10px] text-slate-400">
-          <Clock size={10} />
-          <span className="truncate">{lastActivity.title}</span>
-          <span className="shrink-0">· {timeAgo(lastActivity.createdAt)}</span>
-        </div>
-      )}
+      <div className="pt-2 border-t border-slate-50 flex items-center justify-between gap-2">
+        {lastActivity ? (
+          <div className="flex items-center gap-1 text-[10px] text-slate-400 min-w-0">
+            <Clock size={10} className="shrink-0" />
+            <span className="truncate">{lastActivity.title}</span>
+            <span className="shrink-0">· {timeAgo(lastActivity.createdAt)}</span>
+          </div>
+        ) : (
+          <span className="text-[10px] text-slate-300">No activity yet</span>
+        )}
+
+        {/* Days since contact badge */}
+        {followUpBadge && (
+          <span className={cn('inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full shrink-0', followUpBadge.cls)}>
+            {followUpBadge.icon}
+            {followUpBadge.label}
+          </span>
+        )}
+      </div>
     </Card>
   );
 }

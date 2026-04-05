@@ -68,6 +68,7 @@ export interface Deal {
   closeDate?: string;
   lossReason?: string;
   notes: string;
+  stageHistory?: { stage: DealStage; enteredAt: string }[];
   assignedTo?: string;
   tags: string[];
   createdAt: string;
@@ -143,6 +144,30 @@ export interface Notification {
   entityId?: string;
   isRead: boolean;
   createdAt: string;
+}
+
+export interface Showing {
+  id: string;
+  dealId: string;
+  clientId: string;
+  propertyId?: string;
+  scheduledAt: string;
+  status: 'scheduled' | 'completed' | 'cancelled';
+  feedback?: 'loved' | 'liked' | 'neutral' | 'not_interested';
+  agentNotes: string;
+  createdAt: string;
+}
+
+export interface UserGoals {
+  userId: string;
+  month: string; // YYYY-MM
+  closingsGoal: number;
+  revenueGoal: number;
+  activitiesGoal: number;
+}
+
+export interface AppSettings {
+  theme: 'light' | 'dark';
 }
 
 // ─── Filter shapes ─────────────────────────────────────────────────────────────

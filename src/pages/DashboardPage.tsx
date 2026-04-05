@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, UserCheck, CheckSquare, TrendingUp, Briefcase, Activity, ArrowRight, Flame } from 'lucide-react';
+import {
+  Users, UserCheck, CheckSquare, TrendingUp, Briefcase, Activity,
+  ArrowRight, Flame, DollarSign, AlertCircle, Calendar,
+} from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
 import { StatCard } from '../components/ui/StatCard';
 import { Card } from '../components/ui/Card';
@@ -12,7 +15,7 @@ import { useDeals } from '../hooks/useDeals';
 import { useActivityLog } from '../hooks/useActivityLog';
 import { useTasks } from '../hooks/useTasks';
 import { useUsers } from '../hooks/useUsers';
-import { timeAgo, formatCurrency } from '../lib/utils';
+import { timeAgo, formatCurrency, cn } from '../lib/utils';
 
 const STAGE_LABEL: Record<string, string> = {
   inquiry: 'Inquiry', showing: 'Showing', offer: 'Offer',
@@ -27,13 +30,28 @@ export function DashboardPage() {
   const { groupedTasks } = useTasks();
   const { currentUser } = useUsers();
 
+  const now = new Date();
+
   const stats = useMemo(() => ({
     total: clients.length,
     active: clients.filter(c => c.status === 'active').length,
-    hot: clients.filter(c => c.leadTemperature === 'hot').length,
     closedDeals: deals.filter(d => d.stage === 'closed_won').length,
     activeDeals: deals.filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost').length,
   }), [clients, deals]);
+
+  // Pipeline revenue forecast (deals closing this month)
+  const forecast = useMemo(() => {
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const thisMonth = deals.filter(d =>
+      d.closeDate && d.closeDate >= monthStart && d.closeDate <= monthEnd
+      && d.stage !== 'closed_lost'
+    );
+    const value = thisMonth.reduce((s, d) => s + (d.value ?? 0), 0);
+    const commission = thisMonth.reduce((s, d) =>
+      s + ((d.value ?? 0) * (d.commissionPct ?? 0)) / 100, 0);
+    return { count: thisMonth.length, value, commission };
+  }, [deals, now]);
 
   const recentActivity = useMemo(() =>
     [...entries].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 8),
@@ -43,6 +61,23 @@ export function DashboardPage() {
 
   const todayTasks = groupedTasks.today;
   const overdueTasks = groupedTasks.overdue;
+
+  // Follow-up due: clients with no activity in >14 days
+  const followUpDue = useMemo(() => {
+    const entryMap = new Map<string, string>();
+    for (const e of entries) {
+      const existing = entryMap.get(e.clientId);
+      if (!existing || e.createdAt > existing) entryMap.set(e.clientId, e.createdAt);
+    }
+    const cutoff = Date.now() - 14 * 86400000;
+    return clients
+      .filter(c => {
+        if (c.status !== 'active') return false;
+        const last = entryMap.get(c.id);
+        return !last || new Date(last).getTime() < cutoff;
+      })
+      .slice(0, 4);
+  }, [clients, entries]);
 
   // Pipeline summary
   const stageGroups = useMemo(() => {
@@ -56,13 +91,19 @@ export function DashboardPage() {
     })).filter(s => s.count > 0);
   }, [deals]);
 
+  // Monthly commission (closed this month)
+  const monthlyCommission = useMemo(() => {
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    return deals
+      .filter(d => d.stage === 'closed_won' && d.updatedAt >= monthStart)
+      .reduce((s, d) => s + ((d.value ?? 0) * (d.commissionPct ?? 0)) / 100, 0);
+  }, [deals, now]);
+
+  const greeting = currentUser ? `Welcome back, ${currentUser.name.split(' ')[0]}` : 'Dashboard';
+
   return (
     <div className="flex flex-col flex-1">
-      <TopBar
-        title={currentUser ? `Welcome back, ${currentUser.name.split(' ')[0]}` : 'Dashboard'}
-        onMenuClick={openSidebar}
-        onSearchClick={openCommandPalette}
-      />
+      <TopBar title={greeting} onMenuClick={openSidebar} onSearchClick={openCommandPalette} />
 
       <div className="flex-1 p-4 md:p-6 space-y-5 overflow-y-auto">
         {/* KPI row */}
@@ -72,6 +113,32 @@ export function DashboardPage() {
           <StatCard label="Pipeline Value" value={formatCurrency(pipelineValue)} icon={<TrendingUp size={18} />} color="text-blue-600" />
           <StatCard label="Active Deals" value={stats.activeDeals} icon={<Briefcase size={18} />} color="text-purple-600" />
         </div>
+
+        {/* Forecast + Commission row */}
+        {(forecast.count > 0 || monthlyCommission > 0) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {forecast.count > 0 && (
+              <Card className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <Calendar size={14} className="text-indigo-500" />
+                  <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">Closing This Month</p>
+                </div>
+                <p className="text-2xl font-bold text-indigo-800">{formatCurrency(forecast.value)}</p>
+                <p className="text-xs text-indigo-600 mt-0.5">{forecast.count} deal{forecast.count !== 1 ? 's' : ''} · <span className="font-semibold">{formatCurrency(forecast.commission)} commission</span></p>
+              </Card>
+            )}
+            {monthlyCommission > 0 && (
+              <Card className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <DollarSign size={14} className="text-emerald-600" />
+                  <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Commission Earned (Month)</p>
+                </div>
+                <p className="text-2xl font-bold text-emerald-800">{formatCurrency(monthlyCommission)}</p>
+                <p className="text-xs text-emerald-600 mt-0.5">{deals.filter(d => d.stage === 'closed_won').length} total closed deals</p>
+              </Card>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Recent activity */}
@@ -116,6 +183,33 @@ export function DashboardPage() {
 
           {/* Right column */}
           <div className="space-y-4">
+            {/* Follow-up due */}
+            {followUpDue.length > 0 && (
+              <Card className="p-4 border-amber-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <AlertCircle size={14} className="text-amber-500" />
+                  <h3 className="text-sm font-semibold text-slate-800">Follow-up Due</h3>
+                </div>
+                <div className="space-y-1.5">
+                  {followUpDue.map(c => {
+                    const last = entries.filter(e => e.clientId === c.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+                    const days = last ? Math.floor((Date.now() - new Date(last.createdAt).getTime()) / 86400000) : null;
+                    return (
+                      <Link key={c.id} to={`/clients/${c.id}`} className="flex items-center justify-between py-1 group">
+                        <span className="text-xs text-slate-700 truncate group-hover:text-indigo-600">{c.name}</span>
+                        <span className={cn('text-[10px] font-semibold shrink-0', days && days > 21 ? 'text-red-500' : 'text-amber-600')}>
+                          {days ? `${days}d ago` : 'never'}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+                <Link to="/clients">
+                  <Button size="sm" variant="ghost" className="w-full mt-2 text-xs">View All →</Button>
+                </Link>
+              </Card>
+            )}
+
             {/* Tasks due */}
             <Card className="p-4">
               <div className="flex items-center justify-between mb-3">
@@ -131,15 +225,11 @@ export function DashboardPage() {
                 </div>
               )}
               {todayTasks.length === 0 && overdueTasks.length === 0 ? (
-                <p className="text-xs text-slate-400 text-center py-3">All caught up!</p>
+                <p className="text-xs text-slate-400 text-center py-3">All caught up! 🎉</p>
               ) : (
                 <div className="space-y-1.5">
                   {[...overdueTasks, ...todayTasks].slice(0, 4).map(t => (
-                    <Link
-                      key={t.id}
-                      to="/tasks"
-                      className="flex items-center gap-2 py-1 hover:text-indigo-600 group"
-                    >
+                    <Link key={t.id} to="/tasks" className="flex items-center gap-2 py-1 hover:text-indigo-600 group">
                       <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                         t.priority === 'urgent' ? 'bg-red-500' :
                         t.priority === 'high' ? 'bg-amber-500' : 'bg-slate-300'
