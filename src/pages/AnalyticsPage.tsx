@@ -69,6 +69,20 @@ export function AnalyticsPage() {
     return weeks;
   }, [entries, deals]);
 
+  // Source attribution
+  const sourceData = useMemo(() => {
+    const sources = ['zillow', 'referral', 'open_house', 'website', 'cold_call', 'other'] as const;
+    return sources.map(src => {
+      const srcClientIds = clients.filter(c => c.source === src).map(c => c.id);
+      const srcDeals = deals.filter(d => srcClientIds.includes(d.clientId));
+      return {
+        source: src.replace('_', ' '),
+        won: srcDeals.filter(d => d.stage === 'closed_won').length,
+        lost: srcDeals.filter(d => d.stage === 'closed_lost').length,
+      };
+    }).filter(d => d.won + d.lost > 0);
+  }, [clients, deals]);
+
   // Client status breakdown
   const clientStatusData = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -272,7 +286,7 @@ export function AnalyticsPage() {
         {/* Win/Loss analysis */}
         <Card className="p-5">
           <h3 className="text-sm font-semibold text-slate-800 mb-4">Win / Loss Analysis</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="bg-emerald-50 rounded-xl p-4 text-center">
               <p className="text-3xl font-bold text-emerald-700">{deals.filter(d => d.stage === 'closed_won').length}</p>
               <p className="text-xs text-emerald-600 font-medium mt-1">Deals Won</p>
@@ -298,6 +312,24 @@ export function AnalyticsPage() {
               })()}
             </div>
           </div>
+
+          {/* Source attribution */}
+          <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Deals by Lead Source</h4>
+          {sourceData.length === 0 ? (
+            <p className="text-xs text-slate-400 text-center py-4">No closed deals with source data yet.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={sourceData} margin={{ left: -10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="source" tick={{ fontSize: 11, fill: '#64748b' }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#94a3b8' }} />
+                <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e2e8f0' }} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Bar dataKey="won" name="Won" fill="#10b981" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="lost" name="Lost" fill="#ef4444" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </Card>
       </div>
     </div>

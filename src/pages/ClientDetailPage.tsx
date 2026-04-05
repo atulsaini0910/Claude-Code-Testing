@@ -17,6 +17,7 @@ import { useClients } from '../hooks/useClients';
 import { useActivityLog } from '../hooks/useActivityLog';
 import { useDeals } from '../hooks/useDeals';
 import { useTasks } from '../hooks/useTasks';
+import { useProperties } from '../hooks/useProperties';
 import { computeLeadScoreBreakdown } from '../lib/leadScoring';
 import { ClientSummaryCard } from '../components/clients/ClientSummaryCard';
 import { formatBudget, formatDate, formatCurrency, cn } from '../lib/utils';
@@ -29,7 +30,7 @@ const tempIcon = {
   cold: <Snowflake size={13} className="text-blue-400" />,
 };
 
-type Tab = 'overview' | 'deals' | 'tasks' | 'activity';
+type Tab = 'overview' | 'deals' | 'tasks' | 'activity' | 'properties';
 
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -39,6 +40,7 @@ export function ClientDetailPage() {
   const { getEntriesForClient, addEntry, deleteEntry } = useActivityLog();
   const { deals } = useDeals();
   const { tasks, completeTask } = useTasks();
+  const { properties } = useProperties();
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -49,6 +51,16 @@ export function ClientDetailPage() {
 
   const clientDeals = useMemo(() => deals.filter(d => d.clientId === id), [deals, id]);
   const clientTasks = useMemo(() => tasks.filter(t => t.clientId === id), [tasks, id]);
+  const matchedProperties = useMemo(() => properties.filter(p => {
+    const price = p.listPrice ?? 0;
+    const priceOk = price === 0 ||
+      (price >= client!.budget.min * 0.8 && price <= client!.budget.max * 1.2);
+    const typeOk = client!.propertyType === 'any' || p.propertyType === client!.propertyType;
+    const loc = client!.locationPreference?.toLowerCase() ?? '';
+    const city = p.city?.toLowerCase() ?? '';
+    const locOk = !loc || city.includes(loc) || loc.includes(city);
+    return priceOk && typeOk && locOk;
+  }), [properties, client]);
   const openTasks = clientTasks.filter(t => t.status === 'open');
 
   const scoreBreakdown = useMemo(() =>
@@ -113,6 +125,7 @@ export function ClientDetailPage() {
           { key: 'deals', label: `Deals${clientDeals.length > 0 ? ` (${clientDeals.length})` : ''}` },
           { key: 'tasks', label: `Tasks${openTasks.length > 0 ? ` (${openTasks.length})` : ''}` },
           { key: 'activity', label: `Activity${entries.length > 0 ? ` (${entries.length})` : ''}` },
+          { key: 'properties', label: `Matched Properties${matchedProperties.length > 0 ? ` (${matchedProperties.length})` : ''}` },
         ] as { key: Tab; label: string }[]).map(t => (
           <button
             key={t.key}
@@ -361,6 +374,52 @@ export function ClientDetailPage() {
                 onDelete={deleteEntry}
               />
             </Card>
+          </div>
+        )}
+
+        {/* TAB: Matched Properties */}
+        {tab === 'properties' && (
+          <div className="space-y-3 max-w-3xl">
+            <p className="text-xs text-slate-400 mb-1">
+              Showing properties matching {client.name}'s budget ({formatBudget(client.budget.min, client.budget.max)}), type ({client.propertyType}), and location ({client.locationPreference || 'any'}).
+            </p>
+            {matchedProperties.length === 0 ? (
+              <Card className="p-8 text-center">
+                <p className="text-slate-400 text-sm">No matching properties in inventory.</p>
+                <Link to="/properties">
+                  <Button variant="secondary" size="sm" className="mt-3">Browse Properties</Button>
+                </Link>
+              </Card>
+            ) : (
+              matchedProperties.map(prop => (
+                <Link key={prop.id} to={`/properties/${prop.id}`}>
+                  <Card className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-800 truncate">{prop.addressLine1}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{prop.city}, {prop.state} · {prop.propertyType}</p>
+                        {(prop.beds || prop.baths || prop.sqft) && (
+                          <p className="text-xs text-slate-500 mt-1">
+                            {prop.beds ? `${prop.beds}bd` : ''}{prop.baths ? ` ${prop.baths}ba` : ''}{prop.sqft ? ` · ${prop.sqft.toLocaleString()} sqft` : ''}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right shrink-0">
+                        {prop.listPrice && (
+                          <p className="text-sm font-bold text-slate-700">{formatCurrency(prop.listPrice)}</p>
+                        )}
+                        <span className={cn(
+                          'text-[10px] px-2 py-0.5 rounded-full font-medium mt-1 inline-block',
+                          prop.status === 'available' ? 'bg-emerald-50 text-emerald-600' :
+                          prop.status === 'under_contract' ? 'bg-amber-50 text-amber-600' :
+                          'bg-slate-100 text-slate-500'
+                        )}>{prop.status.replace('_', ' ')}</span>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              ))
+            )}
           </div>
         )}
       </div>

@@ -4,6 +4,11 @@ import { User, DollarSign, Calendar, GripVertical } from 'lucide-react';
 import { cn, formatCurrency } from '../../lib/utils';
 import type { Deal } from '../../types';
 
+const STAGE_PROB: Record<string, number> = {
+  inquiry: 10, showing: 25, offer: 55,
+  under_contract: 82, closed_won: 100, closed_lost: 0,
+};
+
 interface DealCardProps {
   deal: Deal;
   clientName?: string;
@@ -24,6 +29,7 @@ export function DealCard({ deal, clientName, onClick, overlay }: DealCardProps) 
   const daysInStage = Math.floor(
     (Date.now() - new Date(deal.updatedAt).getTime()) / 86400000
   );
+  const prob = STAGE_PROB[deal.stage] ?? 0;
 
   return (
     <div
@@ -80,21 +86,31 @@ export function DealCard({ deal, clientName, onClick, overlay }: DealCardProps) 
           </div>
         )}
 
-        {/* Bottom row: tags + days in stage */}
+        {/* Bottom row: tags + days in stage + probability */}
         <div className="flex items-center justify-between">
           <div className="flex gap-1 flex-wrap">
             {deal.tags.slice(0, 2).map(t => (
               <span key={t} className="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded-full">{t}</span>
             ))}
           </div>
-          <span className={cn(
-            'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
-            daysInStage > 14 ? 'bg-red-50 text-red-500' :
-            daysInStage > 7  ? 'bg-amber-50 text-amber-600' :
-                               'bg-slate-50 text-slate-400'
-          )}>
-            {daysInStage}d
-          </span>
+          <div className="flex items-center gap-1">
+            <span className={cn(
+              'text-[10px] px-1.5 py-0.5 rounded-full font-semibold',
+              prob >= 75 ? 'bg-emerald-50 text-emerald-600' :
+              prob >= 40 ? 'bg-amber-50 text-amber-600' :
+                           'bg-red-50 text-red-500'
+            )}>
+              {prob}%
+            </span>
+            <span className={cn(
+              'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
+              daysInStage > 14 ? 'bg-red-50 text-red-500' :
+              daysInStage > 7  ? 'bg-amber-50 text-amber-600' :
+                                 'bg-slate-50 text-slate-400'
+            )}>
+              {daysInStage}d
+            </span>
+          </div>
         </div>
       </div>
     </div>
