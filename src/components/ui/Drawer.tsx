@@ -29,7 +29,7 @@ export function Drawer({ open, onClose, title, children, width = 'w-[480px]', si
       {/* Panel */}
       <div
         className={cn(
-          'fixed top-0 bottom-0 z-50 bg-white shadow-2xl flex flex-col transition-transform duration-300',
+          'fixed top-0 bottom-0 z-50 bg-white dark:bg-slate-900 shadow-2xl flex flex-col transition-transform duration-300',
           width,
           side === 'right' ? 'right-0' : 'left-0',
           open
@@ -37,11 +37,11 @@ export function Drawer({ open, onClose, title, children, width = 'w-[480px]', si
             : side === 'right' ? 'translate-x-full' : '-translate-x-full'
         )}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0">
-          <h2 className="text-base font-semibold text-slate-800">{title}</h2>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">{title}</h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
           >
             <X size={16} />
           </button>

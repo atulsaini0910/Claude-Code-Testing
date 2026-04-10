@@ -1,6 +1,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Bold, Italic, List, ListOrdered, Minus } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { cn } from '../../lib/utils';
 
 interface RichTextEditorProps {
@@ -47,9 +48,9 @@ export function RichTextEditor({ value, onChange, placeholder, className, minHei
   );
 
   return (
-    <div className={cn('border border-slate-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-400', className)}>
+    <div className={cn('border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-400', className)}>
       {/* Toolbar */}
-      <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-slate-100 bg-slate-50">
+      <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
         <ToolBtn
           title="Bold"
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -88,7 +89,7 @@ export function RichTextEditor({ value, onChange, placeholder, className, minHei
         </ToolBtn>
       </div>
       {/* Editor area */}
-      <div className="px-3 py-2 bg-white relative">
+      <div className="px-3 py-2 bg-white dark:bg-slate-700 relative">
         {!value && (
           <p className="absolute top-2 left-3 text-sm text-slate-400 pointer-events-none select-none">
             {placeholder ?? 'Write notes here…'}
@@ -103,11 +104,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, minHei
 // Read-only renderer for notes stored as HTML
 export function RichTextContent({ html, className }: { html: string; className?: string }) {
   if (!html) return null;
-  // Render as safe HTML — content is user-generated from the same session (no XSS risk)
   return (
     <div
-      className={cn('prose prose-sm max-w-none text-slate-700', className)}
-      dangerouslySetInnerHTML={{ __html: html }}
+      className={cn('prose prose-sm max-w-none text-slate-700 dark:text-slate-300', className)}
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }}
     />
   );
 }

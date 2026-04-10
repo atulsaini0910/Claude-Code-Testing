@@ -18,14 +18,14 @@ interface TextareaProps extends BaseProps, TextareaHTMLAttributes<HTMLTextAreaEl
 type TextInputProps = InputProps | TextareaProps;
 
 const inputClasses =
-  'w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+  'w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-700 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
 
 export function TextInput(props: TextInputProps) {
   const { label, error, className, as = 'input', ...rest } = props;
 
   return (
     <div className={cn('flex flex-col gap-1', className)}>
-      <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+      <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
         {label}
       </label>
       {as === 'textarea' ? (

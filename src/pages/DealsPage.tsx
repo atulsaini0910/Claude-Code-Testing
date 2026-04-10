@@ -7,7 +7,7 @@ import {
   SortableContext, verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
-import { Plus, TrendingUp, Briefcase } from 'lucide-react';
+import { Plus, TrendingUp, Briefcase, Download } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
 import { DealCard } from '../components/deals/DealCard';
 import { DealForm } from '../components/deals/DealForm';
@@ -17,8 +17,8 @@ import { useSidebar } from '../components/layout/AppShell';
 import { useDeals } from '../hooks/useDeals';
 import { useClients } from '../hooks/useClients';
 import { useProperties } from '../hooks/useProperties';
-import { formatCurrency } from '../lib/utils';
-import { cn } from '../lib/utils';
+import { formatCurrency, cn } from '../lib/utils';
+import { exportDealsCSV } from '../lib/csvExport';
 import type { Deal, DealStage } from '../types';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -130,9 +130,14 @@ export function DealsPage() {
         onMenuClick={openSidebar}
         onSearchClick={openCommandPalette}
         actions={
+          <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={() => exportDealsCSV(deals)}>
+            <Download size={14} /> Export
+          </Button>
           <Button size="sm" onClick={() => setShowDrawer(true)}>
             <Plus size={14} /> New Deal
           </Button>
+          </div>
         }
       />
 

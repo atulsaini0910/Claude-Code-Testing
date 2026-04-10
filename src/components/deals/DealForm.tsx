@@ -18,8 +18,8 @@ interface DealFormProps {
 
 const defaultForm: FormData = {
   clientId: '', propertyId: undefined, title: '', type: 'purchase',
-  stage: 'inquiry', value: undefined, commissionPct: 3, closeDate: undefined,
-  lossReason: '', notes: '', assignedTo: undefined, tags: [],
+  stage: 'inquiry', value: undefined, commissionPct: 3, agentSplitPct: 70,
+  closeDate: undefined, lossReason: '', notes: '', assignedTo: undefined, tags: [],
 };
 
 export function DealForm({ initial, clients, properties, defaultClientId, onSubmit, onCancel }: DealFormProps) {
@@ -27,6 +27,7 @@ export function DealForm({ initial, clients, properties, defaultClientId, onSubm
     initial
       ? { clientId: initial.clientId, propertyId: initial.propertyId, title: initial.title,
           type: initial.type, stage: initial.stage, value: initial.value, commissionPct: initial.commissionPct,
+          agentSplitPct: initial.agentSplitPct ?? 70,
           closeDate: initial.closeDate, lossReason: initial.lossReason, notes: initial.notes,
           assignedTo: initial.assignedTo, tags: initial.tags }
       : { ...defaultForm, clientId: defaultClientId ?? '' }
@@ -79,9 +80,10 @@ export function DealForm({ initial, clients, properties, defaultClientId, onSubm
           ]} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <TextInput label="Deal Value ($)" type="number" value={form.value ?? ''} onChange={e => set('value', e.target.value ? Number(e.target.value) : undefined)} placeholder="e.g. 500000" />
-        <TextInput label="Commission (%)" type="number" value={form.commissionPct ?? ''} onChange={e => set('commissionPct', e.target.value ? Number(e.target.value) : undefined)} placeholder="e.g. 3" />
+      <div className="grid grid-cols-3 gap-3">
+        <TextInput label="Deal Value ($)" type="number" value={form.value ?? ''} onChange={e => set('value', e.target.value ? Number(e.target.value) : undefined)} placeholder="500000" />
+        <TextInput label="Commission (%)" type="number" value={form.commissionPct ?? ''} onChange={e => set('commissionPct', e.target.value ? Number(e.target.value) : undefined)} placeholder="3" />
+        <TextInput label="Agent Split (%)" type="number" value={form.agentSplitPct ?? ''} onChange={e => set('agentSplitPct', e.target.value ? Number(e.target.value) : undefined)} placeholder="70" />
       </div>
 
       <TextInput label="Expected Close Date" type="date" value={form.closeDate ? form.closeDate.slice(0, 10) : ''} onChange={e => set('closeDate', e.target.value || undefined)} />

@@ -17,7 +17,13 @@ export function useDeals() {
 
   const addDeal = useCallback((data: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>): Deal => {
     const now = new Date().toISOString();
-    const deal: Deal = { ...data, id: uuidv4(), createdAt: now, updatedAt: now };
+    const deal: Deal = {
+      ...data,
+      id: uuidv4(),
+      createdAt: now,
+      updatedAt: now,
+      stageHistory: [{ stage: data.stage, enteredAt: now }],
+    };
     persist([...db.deals.get(), deal]);
     return deal;
   }, [persist]);
@@ -29,9 +35,16 @@ export function useDeals() {
   }, [persist]);
 
   const moveDeal = useCallback((id: string, newStage: DealStage) => {
-    persist(db.deals.get().map(d =>
-      d.id === id ? { ...d, stage: newStage, updatedAt: new Date().toISOString() } : d
-    ));
+    const now = new Date().toISOString();
+    persist(db.deals.get().map(d => {
+      if (d.id !== id) return d;
+      return {
+        ...d,
+        stage: newStage,
+        stageHistory: [...(d.stageHistory ?? []), { stage: newStage, enteredAt: now }],
+        updatedAt: now,
+      };
+    }));
   }, [persist]);
 
   const deleteDeal = useCallback((id: string) => {

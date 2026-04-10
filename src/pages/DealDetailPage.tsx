@@ -65,8 +65,8 @@ export function DealDetailPage() {
   const [tab, setTab] = useState<'overview' | 'activity' | 'tasks' | 'showings'>('overview');
   const [showAddShowing, setShowAddShowing] = useState(false);
   const [showingForm, setShowingForm] = useState({ scheduledAt: '', agentNotes: '', propertyId: '' });
-  // checklist: map of itemId -> completed
-  const [checklist, setChecklist] = useState<Record<string, boolean>>({});
+  // checklist: persisted in deal.checklist
+  const [checklist, setChecklist] = useState<Record<string, boolean>>(() => deal?.checklist ?? {});
 
   const deal = id ? getDeal(id) : undefined;
 
@@ -88,8 +88,11 @@ export function DealDetailPage() {
   const stageChecklist = deal ? (STAGE_CHECKLISTS[deal.stage] ?? []) : [];
   const checkedCount = stageChecklist.filter(item => checklist[item.id]).length;
 
-  const commission = deal?.value && deal?.commissionPct
+  const grossCommission = deal?.value && deal?.commissionPct
     ? (deal.value * deal.commissionPct) / 100
+    : null;
+  const agentNet = grossCommission && deal?.agentSplitPct
+    ? (grossCommission * deal.agentSplitPct) / 100
     : null;
 
   const probability = deal ? dealProbability(deal.stage) : 0;
@@ -206,7 +209,7 @@ export function DealDetailPage() {
           </Card>
           <Card className="p-3 text-center">
             <p className="text-xs text-slate-500 mb-1">Commission</p>
-            <p className="text-lg font-bold text-emerald-600">{commission ? formatCurrency(commission) : '—'}</p>
+            <p className="text-lg font-bold text-emerald-600">{agentNet ? formatCurrency(agentNet) : grossCommission ? formatCurrency(grossCommission) : '—'}</p>
             {deal.commissionPct && <p className="text-[10px] text-slate-400">{deal.commissionPct}%</p>}
           </Card>
           <Card className="p-3 text-center">
@@ -280,24 +283,36 @@ export function DealDetailPage() {
               </div>
 
               {/* Commission Calculator */}
-              <div className="mt-4 pt-4 border-t border-slate-100">
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
                 <div className="flex items-center gap-2 mb-2">
                   <DollarSign size={13} className="text-emerald-600" />
-                  <h4 className="text-xs font-semibold text-slate-600">Commission Breakdown</h4>
+                  <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400">Commission Breakdown</h4>
                 </div>
-                <div className="space-y-1 text-xs text-slate-600">
+                <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
                   <div className="flex justify-between">
                     <span>Sale Price</span>
-                    <span className="font-medium">{deal.value ? formatCurrency(deal.value) : '—'}</span>
+                    <span className="font-medium dark:text-slate-200">{deal.value ? formatCurrency(deal.value) : '—'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Commission Rate</span>
-                    <span className="font-medium">{deal.commissionPct ?? '—'}%</span>
+                    <span className="font-medium dark:text-slate-200">{deal.commissionPct ?? '—'}%</span>
                   </div>
-                  <div className="flex justify-between border-t border-slate-100 pt-1 mt-1 font-semibold text-emerald-700 text-sm">
+                  <div className="flex justify-between border-t border-slate-100 dark:border-slate-700 pt-1 mt-1 font-semibold text-slate-700 dark:text-slate-200">
                     <span>Gross Commission</span>
-                    <span>{commission ? formatCurrency(commission) : '—'}</span>
+                    <span>{grossCommission ? formatCurrency(grossCommission) : '—'}</span>
                   </div>
+                  {deal.agentSplitPct && (
+                    <>
+                      <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                        <span>Agent Split ({deal.agentSplitPct}%)</span>
+                        <span>{agentNet ? formatCurrency(agentNet) : '—'}</span>
+                      </div>
+                      <div className="flex justify-between border-t border-slate-100 dark:border-slate-700 pt-1 mt-1 font-bold text-emerald-700 dark:text-emerald-400 text-sm">
+                        <span>Your Net Commission</span>
+                        <span>{agentNet ? formatCurrency(agentNet) : '—'}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -328,8 +343,12 @@ export function DealDetailPage() {
                   {stageChecklist.map(item => (
                     <button
                       key={item.id}
-                      onClick={() => setChecklist(prev => ({ ...prev, [item.id]: !prev[item.id] }))}
-                      className="w-full flex items-start gap-2.5 text-left hover:bg-slate-50 rounded-lg p-2 transition-colors cursor-pointer group"
+                      onClick={() => {
+                        const updated = { ...checklist, [item.id]: !checklist[item.id] };
+                        setChecklist(updated);
+                        updateDeal(deal.id, { checklist: updated });
+                      }}
+                      className="w-full flex items-start gap-2.5 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg p-2 transition-colors cursor-pointer group"
                     >
                       {checklist[item.id]
                         ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />

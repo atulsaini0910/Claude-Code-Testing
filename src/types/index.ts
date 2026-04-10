@@ -76,10 +76,12 @@ export interface Deal {
   stage: DealStage;
   value?: number;
   commissionPct?: number;
+  agentSplitPct?: number;
   closeDate?: string;
   lossReason?: string;
   notes: string;
   stageHistory?: { stage: DealStage; enteredAt: string }[];
+  checklist?: Record<string, boolean>;
   transactionDates?: TransactionDates;
   assignedTo?: string;
   tags: string[];

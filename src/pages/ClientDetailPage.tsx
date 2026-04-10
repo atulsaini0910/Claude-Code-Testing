@@ -20,6 +20,7 @@ import { useTasks } from '../hooks/useTasks';
 import { useProperties } from '../hooks/useProperties';
 import { computeLeadScoreBreakdown } from '../lib/leadScoring';
 import { ClientSummaryCard } from '../components/clients/ClientSummaryCard';
+import { FollowUpDraftButton } from '../components/clients/FollowUpDraftButton';
 import { formatBudget, formatDate, formatCurrency, cn } from '../lib/utils';
 import type { Client } from '../types';
 import toast from 'react-hot-toast';
@@ -293,6 +294,10 @@ export function ClientDetailPage() {
               </Card>
 
               <ClientSummaryCard client={client} entries={entries} deals={clientDeals} />
+
+              <div className="mt-4">
+                <FollowUpDraftButton client={client} entries={entries} deals={clientDeals} />
+              </div>
             </div>
           </div>
         )}

@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Upload, FileText, CheckCircle2, AlertTriangle, ArrowRight, Download, X } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
 import { Card } from '../components/ui/Card';
@@ -27,6 +28,7 @@ const IMPORTABLE_FIELDS = [
 export function ImportPage() {
   const { openSidebar, openCommandPalette } = useSidebar();
   const { addClient } = useClients();
+  const navigate = useNavigate();
   const [step, setStep] = useState<Step>('upload');
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<Record<string, string>[]>([]);
@@ -300,7 +302,7 @@ export function ImportPage() {
               <Button variant="secondary" onClick={reset}>
                 <X size={14} /> Import Another File
               </Button>
-              <Button onClick={() => window.location.href = '/Claude-Code-Testing/#/clients'}>
+              <Button onClick={() => navigate('/clients')}>
                 View Clients →
               </Button>
             </div>
