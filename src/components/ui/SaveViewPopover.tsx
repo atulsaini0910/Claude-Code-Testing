@@ -30,10 +30,10 @@ export function SaveViewPopover({ onSave, className }: SaveViewPopoverProps) {
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-9 z-20 w-64 bg-white border border-slate-200 rounded-xl shadow-lg p-4">
+          <div className="absolute right-0 top-9 z-20 w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg p-4">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-slate-800">Save Current View</p>
-              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Save Current View</p>
+              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                 <X size={13} />
               </button>
             </div>
@@ -44,9 +44,9 @@ export function SaveViewPopover({ onSave, className }: SaveViewPopoverProps) {
               onChange={e => setName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSave()}
               autoFocus
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-3"
+              className="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-3"
             />
-            <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer mb-3">
+            <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer mb-3">
               <input
                 type="checkbox"
                 checked={isShared}

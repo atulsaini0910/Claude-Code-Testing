@@ -22,7 +22,7 @@ const propertyOptions = [
 ];
 
 const selectClass =
-  'rounded-lg border border-slate-200 text-sm text-slate-700 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white';
+  'rounded-lg border border-slate-200 dark:border-slate-600 text-sm text-slate-700 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-slate-700';
 
 export function ClientFilters({ filters, setFilters }: ClientFiltersProps) {
   return (

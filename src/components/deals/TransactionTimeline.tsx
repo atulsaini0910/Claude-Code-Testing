@@ -55,7 +55,7 @@ export function TransactionTimeline({ dates, onChange }: TransactionTimelineProp
         </div>
         <button
           onClick={handlePrint}
-          className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer transition-colors"
+          className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
         >
           <Printer size={12} /> Print
         </button>

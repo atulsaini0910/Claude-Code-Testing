@@ -117,7 +117,7 @@ export function PropertyDetailPage() {
 
               {/* Stats */}
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-slate-50 rounded-lg p-3 text-center">
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 text-center">
                   <p className="text-xs text-slate-500 mb-0.5">List Price</p>
                   <p className="text-sm font-bold text-slate-800">{property.listPrice ? formatCurrency(property.listPrice) : '—'}</p>
                 </div>
@@ -127,7 +127,7 @@ export function PropertyDetailPage() {
                     <p className="text-sm font-bold text-emerald-700">{formatCurrency(property.soldPrice)}</p>
                   </div>
                 )}
-                <div className="bg-slate-50 rounded-lg p-3 text-center">
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 text-center">
                   <p className="text-xs text-slate-500 mb-0.5">Days Listed</p>
                   <p className={cn('text-sm font-bold', dom > 60 ? 'text-red-500' : dom > 30 ? 'text-amber-600' : 'text-slate-800')}>{dom}</p>
                 </div>
@@ -209,7 +209,7 @@ export function PropertyDetailPage() {
                   {linkedDeals.map(deal => {
                     const client = clients.find(c => c.id === deal.clientId);
                     return (
-                      <Link key={deal.id} to={`/deals/${deal.id}`} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100">
+                      <Link key={deal.id} to={`/deals/${deal.id}`} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border border-slate-100 dark:border-slate-700">
                         <div>
                           <p className="text-sm font-medium text-slate-800">{deal.title}</p>
                           {client && <p className="text-xs text-slate-400">{client.name}</p>}

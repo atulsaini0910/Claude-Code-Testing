@@ -180,18 +180,18 @@ export function MarketPage() {
                     <thead>
                       <tr className="border-b border-slate-100">
                         {['Month', 'Median Price', 'Days on Mkt', 'List/Sale %', 'Inventory', ''].map(h => (
-                          <th key={h} className="text-left py-2 px-2 text-slate-500 font-semibold">{h}</th>
+                          <th key={h} className="text-left py-2 px-2 text-slate-500 dark:text-slate-400 font-semibold">{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {[...areaData].reverse().map(e => (
-                        <tr key={e.id} className="border-b border-slate-50 hover:bg-slate-50 group">
-                          <td className="py-2 px-2 font-medium text-slate-700">{e.month}</td>
-                          <td className="py-2 px-2 text-slate-600">{formatCurrency(e.medianPrice)}</td>
-                          <td className="py-2 px-2 text-slate-600">{e.daysOnMarket || '—'}</td>
-                          <td className="py-2 px-2 text-slate-600">{e.listToSaleRatio > 0 ? `${(e.listToSaleRatio * 100).toFixed(1)}%` : '—'}</td>
-                          <td className="py-2 px-2 text-slate-600">{e.inventory || '—'}</td>
+                        <tr key={e.id} className="border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 group">
+                          <td className="py-2 px-2 font-medium text-slate-700 dark:text-slate-200">{e.month}</td>
+                          <td className="py-2 px-2 text-slate-600 dark:text-slate-400">{formatCurrency(e.medianPrice)}</td>
+                          <td className="py-2 px-2 text-slate-600 dark:text-slate-400">{e.daysOnMarket || '—'}</td>
+                          <td className="py-2 px-2 text-slate-600 dark:text-slate-400">{e.listToSaleRatio > 0 ? `${(e.listToSaleRatio * 100).toFixed(1)}%` : '—'}</td>
+                          <td className="py-2 px-2 text-slate-600 dark:text-slate-400">{e.inventory || '—'}</td>
                           <td className="py-2 px-2 text-right">
                             <button
                               onClick={() => handleDelete(e)}

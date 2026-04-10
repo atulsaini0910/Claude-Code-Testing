@@ -120,18 +120,18 @@ export function CommandPalette({ open, onClose, onQuickAdd }: CommandPaletteProp
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-xl mx-4 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden">
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 dark:border-slate-700">
           <Search size={16} className="text-slate-400 shrink-0" />
           <input
             autoFocus
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search clients, deals, actions..."
-            className="flex-1 text-sm text-slate-800 placeholder-slate-400 outline-none bg-transparent"
+            className="flex-1 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 outline-none bg-transparent"
           />
-          <kbd className="text-[10px] text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">ESC</kbd>
+          <kbd className="text-[10px] text-slate-400 border border-slate-200 dark:border-slate-600 rounded px-1.5 py-0.5">ESC</kbd>
         </div>
 
         {/* Results */}
@@ -139,7 +139,7 @@ export function CommandPalette({ open, onClose, onQuickAdd }: CommandPaletteProp
           {Object.entries(grouped).map(([category, items]) => (
             <div key={category}>
               <div className="px-4 pt-2 pb-1">
-                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{category}</span>
+                <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{category}</span>
               </div>
               {items.map(item => {
                 const idx = itemIdx++;
@@ -150,10 +150,10 @@ export function CommandPalette({ open, onClose, onQuickAdd }: CommandPaletteProp
                     onMouseEnter={() => setActiveIdx(idx)}
                     className={cn(
                       'w-full flex items-center gap-3 px-4 py-2 text-left transition-colors cursor-pointer',
-                      activeIdx === idx ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700 hover:bg-slate-50'
+                      activeIdx === idx ? 'bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                     )}
                   >
-                    <span className={activeIdx === idx ? 'text-indigo-500' : 'text-slate-400'}>{item.icon}</span>
+                    <span className={activeIdx === idx ? 'text-indigo-500' : 'text-slate-400 dark:text-slate-500'}>{item.icon}</span>
                     <div className="min-w-0">
                       <p className="text-sm font-medium leading-none">{item.label}</p>
                       {item.description && (
@@ -171,10 +171,10 @@ export function CommandPalette({ open, onClose, onQuickAdd }: CommandPaletteProp
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2 border-t border-slate-50 flex items-center gap-3 text-[10px] text-slate-400">
-          <span><kbd className="border border-slate-200 rounded px-1">↑↓</kbd> navigate</span>
-          <span><kbd className="border border-slate-200 rounded px-1">↵</kbd> select</span>
-          <span><kbd className="border border-slate-200 rounded px-1">esc</kbd> close</span>
+        <div className="px-4 py-2 border-t border-slate-50 dark:border-slate-700 flex items-center gap-3 text-[10px] text-slate-400 dark:text-slate-500">
+          <span><kbd className="border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded px-1">↑↓</kbd> navigate</span>
+          <span><kbd className="border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded px-1">↵</kbd> select</span>
+          <span><kbd className="border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded px-1">esc</kbd> close</span>
         </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ interface ActivityFormProps {
 }
 
 const selectClass =
-  'w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+  'w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
 
 export function ActivityForm({ clientId, onSubmit, onCancel }: ActivityFormProps) {
   const [type, setType] = useState<ActivityType>('call');
@@ -45,10 +45,10 @@ export function ActivityForm({ clientId, onSubmit, onCancel }: ActivityFormProps
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-50 rounded-xl p-4 space-y-3 border border-slate-100">
+    <form onSubmit={handleSubmit} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 space-y-3 border border-slate-100 dark:border-slate-700">
       <div className="flex items-center gap-2">
         <div className="flex flex-col gap-1 flex-1">
-          <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Type</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Type</label>
           <select
             className={selectClass}
             value={type}
@@ -64,11 +64,11 @@ export function ActivityForm({ clientId, onSubmit, onCancel }: ActivityFormProps
 
         {/* Templates button */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide invisible">.</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide invisible">.</label>
           <button
             type="button"
             onClick={() => setShowTemplates(v => !v)}
-            className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer font-medium"
+            className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border border-indigo-200 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors cursor-pointer font-medium"
           >
             <Sparkles size={12} /> Templates
           </button>
@@ -77,8 +77,8 @@ export function ActivityForm({ clientId, onSubmit, onCancel }: ActivityFormProps
 
       {/* Template picker */}
       {showTemplates && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide px-3 py-2 border-b border-slate-100">
+        <div className="bg-white dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 shadow-sm overflow-hidden">
+          <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide px-3 py-2 border-b border-slate-100 dark:border-slate-600">
             {filteredTemplates.length > 0 ? 'Click to apply' : `No ${type} templates`}
           </p>
           {filteredTemplates.map(t => (
@@ -86,7 +86,7 @@ export function ActivityForm({ clientId, onSubmit, onCancel }: ActivityFormProps
               key={t.id}
               type="button"
               onClick={() => applyTemplate(t.id)}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors cursor-pointer border-b border-slate-50 last:border-0"
+              className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors cursor-pointer border-b border-slate-50 dark:border-slate-600 last:border-0"
             >
               {t.label}
             </button>

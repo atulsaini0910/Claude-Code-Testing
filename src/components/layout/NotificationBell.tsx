@@ -55,9 +55,9 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-            <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Notifications</h3>
             {unreadCount > 0 && (
               <button onClick={markAllRead} className="text-xs text-indigo-600 hover:underline cursor-pointer flex items-center gap-1">
                 <CheckCheck size={12} /> Mark all read
@@ -73,17 +73,17 @@ export function NotificationBell() {
                   key={n.id}
                   onClick={() => handleClick(n)}
                   className={cn(
-                    'w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 cursor-pointer',
-                    !n.isRead && 'bg-indigo-50/40'
+                    'w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border-b border-slate-50 dark:border-slate-700/50 last:border-0 cursor-pointer',
+                    !n.isRead && 'bg-indigo-50/40 dark:bg-indigo-900/20'
                   )}
                 >
                   <span className="mt-0.5 shrink-0">{typeIcon[n.type]}</span>
                   <div className="min-w-0 flex-1">
-                    <p className={cn('text-xs leading-snug', !n.isRead ? 'font-semibold text-slate-800' : 'text-slate-600')}>
+                    <p className={cn('text-xs leading-snug', !n.isRead ? 'font-semibold text-slate-800 dark:text-slate-100' : 'text-slate-600 dark:text-slate-400')}>
                       {n.title}
                     </p>
-                    {n.body && <p className="text-[11px] text-slate-400 mt-0.5 truncate">{n.body}</p>}
-                    <p className="text-[10px] text-slate-300 mt-0.5">{timeAgo(n.createdAt)}</p>
+                    {n.body && <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 truncate">{n.body}</p>}
+                    <p className="text-[10px] text-slate-300 dark:text-slate-600 mt-0.5">{timeAgo(n.createdAt)}</p>
                   </div>
                   {!n.isRead && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1 shrink-0" />}
                 </button>

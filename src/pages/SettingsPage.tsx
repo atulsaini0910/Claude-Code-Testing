@@ -120,12 +120,12 @@ export function SettingsPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-              <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
+              <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                 <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                   <TrendingUp size={16} className="text-emerald-600" />
                 </div>
                 <div className="flex-1">
-                  <label className="text-sm font-medium text-slate-700">Closings Goal</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Closings Goal</label>
                   <p className="text-xs text-slate-400">Number of deals to close</p>
                 </div>
                 <input
@@ -137,12 +137,12 @@ export function SettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
+              <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                 <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
                   <DollarSign size={16} className="text-indigo-600" />
                 </div>
                 <div className="flex-1">
-                  <label className="text-sm font-medium text-slate-700">Revenue Goal ($)</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Revenue Goal ($)</label>
                   <p className="text-xs text-slate-400">Commission target this month</p>
                 </div>
                 <input
@@ -154,12 +154,12 @@ export function SettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
+              <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                 <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
                   <Activity size={16} className="text-purple-600" />
                 </div>
                 <div className="flex-1">
-                  <label className="text-sm font-medium text-slate-700">Activities Goal</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Activities Goal</label>
                   <p className="text-xs text-slate-400">Calls, meetings, emails to log</p>
                 </div>
                 <input
@@ -213,11 +213,11 @@ export function SettingsPage() {
             <h3 className="text-sm font-semibold text-slate-800">Appearance</h3>
 
             {/* Dark mode toggle */}
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
               <div className="flex items-center gap-3">
                 {settings.theme === 'dark' ? <Moon size={18} className="text-indigo-500" /> : <Sun size={18} className="text-amber-500" />}
                 <div>
-                  <p className="text-sm font-medium text-slate-700">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
                     {settings.theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
                   </p>
                   <p className="text-xs text-slate-400">Toggle between light and dark interface</p>
@@ -254,9 +254,9 @@ export function SettingsPage() {
             <h3 className="text-sm font-semibold text-slate-800 mb-4">Keyboard Shortcuts</h3>
             <div className="space-y-2">
               {SHORTCUTS.map(s => (
-                <div key={s.action} className="flex items-center justify-between py-1.5 border-b border-slate-50 last:border-0">
-                  <span className="text-sm text-slate-600">{s.action}</span>
-                  <kbd className="text-xs px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200 font-mono">{s.keys}</kbd>
+                <div key={s.action} className="flex items-center justify-between py-1.5 border-b border-slate-50 dark:border-slate-700/50 last:border-0">
+                  <span className="text-sm text-slate-600 dark:text-slate-400">{s.action}</span>
+                  <kbd className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-600 font-mono">{s.keys}</kbd>
                 </div>
               ))}
             </div>

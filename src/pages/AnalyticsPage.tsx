@@ -316,7 +316,7 @@ export function AnalyticsPage() {
                 : null;
               const STAGE_LABELS2: Record<string, string> = { inquiry: 'Inquiry', showing: 'Showing', offer: 'Offer', under_contract: 'Under Contract' };
               return (
-                <div key={stage} className="bg-slate-50 rounded-xl p-3 text-center">
+                <div key={stage} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 text-center">
                   <p className="text-xs text-slate-500 mb-1">{STAGE_LABELS2[stage]}</p>
                   <p className="text-2xl font-bold text-slate-800">{avgDays ?? '—'}</p>
                   <p className="text-[10px] text-slate-400">avg days</p>
@@ -340,7 +340,7 @@ export function AnalyticsPage() {
               <p className="text-xs text-red-600 font-medium mt-1">Deals Lost</p>
               <p className="text-xs text-slate-400 mt-0.5">{deals.filter(d => d.stage === 'closed_lost').reduce((s, d) => s + (d.value ?? 0), 0) > 0 ? formatCurrency(deals.filter(d => d.stage === 'closed_lost').reduce((s, d) => s + (d.value ?? 0), 0)) + ' potential' : 'No value logged'}</p>
             </div>
-            <div className="bg-slate-50 rounded-xl p-4 text-center">
+            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
               {(() => {
                 const total = deals.filter(d => d.stage === 'closed_won' || d.stage === 'closed_lost').length;
                 const won = deals.filter(d => d.stage === 'closed_won').length;

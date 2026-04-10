@@ -24,12 +24,12 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 const STAGES: { key: DealStage; label: string; color: string; headerColor: string }[] = [
-  { key: 'inquiry',        label: 'Inquiry',        color: 'border-slate-200',  headerColor: 'bg-slate-50 text-slate-600' },
-  { key: 'showing',        label: 'Showing',        color: 'border-blue-200',   headerColor: 'bg-blue-50 text-blue-700' },
-  { key: 'offer',          label: 'Offer',          color: 'border-amber-200',  headerColor: 'bg-amber-50 text-amber-700' },
-  { key: 'under_contract', label: 'Under Contract', color: 'border-purple-200', headerColor: 'bg-purple-50 text-purple-700' },
-  { key: 'closed_won',     label: 'Closed Won',     color: 'border-emerald-200',headerColor: 'bg-emerald-50 text-emerald-700' },
-  { key: 'closed_lost',    label: 'Lost',           color: 'border-red-200',    headerColor: 'bg-red-50 text-red-500' },
+  { key: 'inquiry',        label: 'Inquiry',        color: 'border-slate-200 dark:border-slate-700',   headerColor: 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300' },
+  { key: 'showing',        label: 'Showing',        color: 'border-blue-200 dark:border-blue-800',     headerColor: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' },
+  { key: 'offer',          label: 'Offer',          color: 'border-amber-200 dark:border-amber-800',   headerColor: 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' },
+  { key: 'under_contract', label: 'Under Contract', color: 'border-purple-200 dark:border-purple-800', headerColor: 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' },
+  { key: 'closed_won',     label: 'Closed Won',     color: 'border-emerald-200 dark:border-emerald-800',headerColor: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' },
+  { key: 'closed_lost',    label: 'Lost',           color: 'border-red-200 dark:border-red-800',      headerColor: 'bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400' },
 ];
 
 function DroppableColumn({ stage, deals, clients, headerColor, borderColor }: {
@@ -77,7 +77,7 @@ function DroppableColumn({ stage, deals, clients, headerColor, borderColor }: {
           ))}
         </SortableContext>
         {deals.length === 0 && (
-          <div className="flex items-center justify-center h-20 text-xs text-slate-300 rounded-lg border border-dashed border-slate-200">
+          <div className="flex items-center justify-center h-20 text-xs text-slate-300 dark:text-slate-600 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
             Drop here
           </div>
         )}
@@ -142,16 +142,16 @@ export function DealsPage() {
       />
 
       {/* Pipeline stats */}
-      <div className="flex items-center gap-6 px-4 md:px-6 py-3 bg-white border-b border-slate-100">
+      <div className="flex items-center gap-6 px-4 md:px-6 py-3 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
         <div className="flex items-center gap-2">
           <TrendingUp size={14} className="text-indigo-500" />
           <span className="text-xs text-slate-500">Pipeline</span>
-          <span className="text-sm font-bold text-slate-800">{formatCurrency(pipelineValue)}</span>
+          <span className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatCurrency(pipelineValue)}</span>
         </div>
         <div className="flex items-center gap-2">
           <Briefcase size={14} className="text-emerald-500" />
-          <span className="text-xs text-slate-500">Active</span>
-          <span className="text-sm font-bold text-slate-800">{activeDeals}</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">Active</span>
+          <span className="text-sm font-bold text-slate-800 dark:text-slate-100">{activeDeals}</span>
         </div>
         <div className="flex items-center gap-2">
           <Briefcase size={14} className="text-slate-400" />

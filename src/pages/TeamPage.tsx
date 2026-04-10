@@ -83,16 +83,16 @@ export function TeamPage() {
                     { label: 'Active', value: s.activeDeals },
                     { label: 'Closed', value: s.closedDeals },
                   ].map(stat => (
-                    <div key={stat.label} className="bg-slate-50 rounded-lg py-1.5">
-                      <p className="text-sm font-bold text-slate-800">{stat.value}</p>
-                      <p className="text-[10px] text-slate-500">{stat.label}</p>
+                    <div key={stat.label} className="bg-slate-50 dark:bg-slate-700/50 rounded-lg py-1.5">
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{stat.value}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{stat.label}</p>
                     </div>
                   ))}
                 </div>
 
                 <div className="flex gap-2">
                   <select
-                    className="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1 text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                    className="flex-1 text-xs border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-400"
                     value={user.role}
                     onChange={e => { updateUser(user.id, { role: e.target.value as UserRole }); toast.success('Role updated'); }}
                   >

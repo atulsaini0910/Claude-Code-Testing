@@ -119,7 +119,7 @@ export function ClientsPage() {
             <input
               type="text"
               placeholder="Search clients by name, email, or location..."
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-slate-800"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />

@@ -187,19 +187,19 @@ export function ShowingsPage() {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => { const d = new Date(weekStart); d.setDate(d.getDate() - 7); setWeekStart(d); }}
-                className="p-1.5 rounded hover:bg-slate-100 text-slate-500 cursor-pointer"
+                className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-pointer"
               >
                 <ChevronLeft size={15} />
               </button>
               <button
                 onClick={() => setWeekStart(startOfWeek(new Date()))}
-                className="text-xs px-2.5 py-1 rounded border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer"
+                className="text-xs px-2.5 py-1 rounded border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 cursor-pointer"
               >
                 Today
               </button>
               <button
                 onClick={() => { const d = new Date(weekStart); d.setDate(d.getDate() + 7); setWeekStart(d); }}
-                className="p-1.5 rounded hover:bg-slate-100 text-slate-500 cursor-pointer"
+                className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-pointer"
               >
                 <ChevronRight size={15} />
               </button>
@@ -213,10 +213,10 @@ export function ShowingsPage() {
               return (
                 <div key={i} className={cn(
                   'min-h-[100px] rounded-lg p-1.5',
-                  isToday(day) ? 'bg-indigo-50 border border-indigo-200' : 'bg-slate-50 border border-slate-100'
+                  isToday(day) ? 'bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700' : 'bg-slate-50 dark:bg-slate-700/30 border border-slate-100 dark:border-slate-700'
                 )}>
                   {/* Day header */}
-                  <div className={cn('text-center mb-1.5', isToday(day) ? 'text-indigo-700' : 'text-slate-500')}>
+                  <div className={cn('text-center mb-1.5', isToday(day) ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400')}>
                     <div className="text-[10px] font-semibold uppercase">{DAY_LABELS[day.getDay()]}</div>
                     <div className={cn('text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mx-auto',
                       isToday(day) ? 'bg-indigo-600 text-white' : ''

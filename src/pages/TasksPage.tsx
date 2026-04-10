@@ -32,10 +32,10 @@ function TaskItem({ task, clientName, onComplete, onDelete }: {
     <div className={cn(
       'flex items-start gap-3 p-3 rounded-xl border group transition-all',
       task.status === 'completed'
-        ? 'border-slate-100 bg-slate-50/50'
+        ? 'border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30'
         : isOverdue
-          ? 'border-red-100 bg-red-50/30'
-          : 'border-slate-100 bg-white hover:border-slate-200'
+          ? 'border-red-100 dark:border-red-900/50 bg-red-50/30 dark:bg-red-900/10'
+          : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-600'
     )}>
       <button
         onClick={onComplete}
@@ -52,7 +52,7 @@ function TaskItem({ task, clientName, onComplete, onDelete }: {
       <div className="flex-1 min-w-0">
         <p className={cn(
           'text-sm font-medium leading-snug',
-          task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-800'
+          task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-100'
         )}>
           {task.title}
         </p>

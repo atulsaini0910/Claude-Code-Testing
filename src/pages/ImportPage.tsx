@@ -220,14 +220,14 @@ export function ImportPage() {
               <div className="space-y-2">
                 {headers.map(h => (
                   <div key={h} className="flex items-center gap-3">
-                    <div className="flex-1 text-sm text-slate-700 bg-slate-50 rounded-lg px-3 py-2 min-w-0 truncate">
+                    <div className="flex-1 text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700 rounded-lg px-3 py-2 min-w-0 truncate">
                       {h}
                     </div>
                     <ArrowRight size={14} className="text-slate-300 shrink-0" />
                     <select
                       value={columnMap[h] ?? 'skip'}
                       onChange={e => setColumnMap(p => ({ ...p, [h]: e.target.value }))}
-                      className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      className="flex-1 rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     >
                       {IMPORTABLE_FIELDS.map(f => (
                         <option key={f.key} value={f.key}>{f.label}{f.required ? ' *' : ''}</option>
