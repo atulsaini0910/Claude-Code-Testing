@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { Users, Briefcase, CheckSquare, DollarSign, Award } from 'lucide-react';
+import { Users, Briefcase, CheckSquare, DollarSign, Award, Calendar } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
 import { Card } from '../components/ui/Card';
 import { StatCard } from '../components/ui/StatCard';
@@ -17,13 +17,33 @@ import { formatCurrency } from '../lib/utils';
 
 const COLORS = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
+type DateRange = '7d' | '30d' | '90d' | '365d' | 'all';
+const DATE_RANGES: { key: DateRange; label: string }[] = [
+  { key: '7d', label: 'Last 7 days' },
+  { key: '30d', label: 'Last 30 days' },
+  { key: '90d', label: 'Last 90 days' },
+  { key: '365d', label: 'This year' },
+  { key: 'all', label: 'All time' },
+];
+
+function rangeStart(range: DateRange): number {
+  if (range === 'all') return 0;
+  const days = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 365;
+  return Date.now() - days * 86400000;
+}
+
 export function AnalyticsPage() {
   const { openSidebar, openCommandPalette } = useSidebar();
   const { clients } = useClients();
-  const { deals } = useDeals();
-  const { entries } = useActivityLog();
+  const { deals: allDeals } = useDeals();
+  const { entries: allEntries } = useActivityLog();
   const { tasks, groupedTasks } = useTasks();
   const { users } = useUsers();
+  const [dateRange, setDateRange] = useState<DateRange>('30d');
+
+  const cutoff = rangeStart(dateRange);
+  const deals = useMemo(() => cutoff === 0 ? allDeals : allDeals.filter(d => new Date(d.updatedAt).getTime() >= cutoff), [allDeals, cutoff]);
+  const entries = useMemo(() => cutoff === 0 ? allEntries : allEntries.filter(e => new Date(e.createdAt).getTime() >= cutoff), [allEntries, cutoff]);
 
   // Pipeline funnel data
   const pipelineData = useMemo(() => {
@@ -121,7 +141,25 @@ export function AnalyticsPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <TopBar title="Analytics" onMenuClick={openSidebar} onSearchClick={openCommandPalette} />
+      <TopBar
+        title="Analytics"
+        onMenuClick={openSidebar}
+        onSearchClick={openCommandPalette}
+        actions={
+          <div className="flex items-center gap-1.5">
+            <Calendar size={13} className="text-slate-400" />
+            {DATE_RANGES.map(r => (
+              <button
+                key={r.key}
+                onClick={() => setDateRange(r.key)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${dateRange === r.key ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       <div className="flex-1 p-4 md:p-6 space-y-6 overflow-y-auto">
         {/* KPI cards */}

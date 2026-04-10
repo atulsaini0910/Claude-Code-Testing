@@ -67,11 +67,12 @@ export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
 
   const validate = () => {
     const e: typeof errors = {};
-    if (!form.name.trim()) e.name = 'Name is required';
-    if (!form.phone.trim()) e.phone = 'Phone is required';
-    if (!form.email.trim()) e.email = 'Email is required';
-    if (!form.locationPreference.trim()) e.locationPreference = 'Location is required';
-    if (form.budget.max < form.budget.min) e.budget = 'Max must be ≥ min';
+    if (!form.name.trim()) e.name = 'Full name is required';
+    else if (form.name.trim().length < 2) e.name = 'Name must be at least 2 characters';
+    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Enter a valid email address';
+    if (form.phone.trim() && form.phone.replace(/\D/g, '').length < 7) e.phone = 'Enter a valid phone number';
+    if (form.budget.min < 0) e.budget = 'Budget cannot be negative';
+    else if (form.budget.max > 0 && form.budget.max < form.budget.min) e.budget = 'Max budget must be ≥ min budget';
     setErrors(e);
     return Object.keys(e).length === 0;
   };

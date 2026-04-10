@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Building2, X, Briefcase, Home,
   CheckSquare, BarChart2, Settings, ChevronDown, ChevronRight,
-  UserCog, FolderInput, Bookmark, Calendar, TrendingUp, Trash2,
+  UserCog, FolderInput, Bookmark, Calendar, TrendingUp, Trash2, FileText,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
@@ -18,6 +18,7 @@ const mainNav = [
   { to: '/showings',   label: 'Showings',        icon: Calendar },
   { to: '/tasks',      label: 'Tasks',           icon: CheckSquare, badge: true },
   { to: '/analytics',  label: 'Analytics',       icon: BarChart2 },
+  { to: '/reports',    label: 'Reports',         icon: FileText },
   { to: '/market',     label: 'Market Pulse',    icon: TrendingUp },
 ];
 

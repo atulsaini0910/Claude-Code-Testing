@@ -182,6 +182,14 @@ export interface UserGoals {
 
 export interface AppSettings {
   theme: 'light' | 'dark';
+  density: 'compact' | 'comfortable' | 'spacious';
+  notifications: {
+    taskDue: boolean;
+    stageChanges: boolean;
+    clientAssigned: boolean;
+    dailyDigest: boolean;
+    followUpOverdue: boolean;
+  };
 }
 
 export interface MarketData {

@@ -73,19 +73,31 @@ export function ClientCard({ client, lastActivity, selected, onSelect }: ClientC
         <Badge value={client.status} />
       </div>
 
-      <div className="space-y-1 text-xs text-slate-600 mb-2.5">
+      <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400 mb-2.5">
         <div className="flex items-center gap-1.5">
           <MapPin size={11} className="text-slate-400 shrink-0" />
-          <span className="truncate">{client.locationPreference}</span>
+          <span className="truncate">{client.locationPreference || '—'}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Phone size={11} className="text-slate-400 shrink-0" />
-          {client.phone}
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Mail size={11} className="text-slate-400 shrink-0" />
-          <span className="truncate">{client.email}</span>
-        </div>
+        {client.phone && (
+          <div className="flex items-center gap-1.5">
+            <Phone size={11} className="text-slate-400 shrink-0" />
+            <a
+              href={`tel:${client.phone.replace(/\s/g, '')}`}
+              onClick={e => e.stopPropagation()}
+              className="truncate hover:text-indigo-600 transition-colors"
+            >{client.phone}</a>
+          </div>
+        )}
+        {client.email && (
+          <div className="flex items-center gap-1.5">
+            <Mail size={11} className="text-slate-400 shrink-0" />
+            <a
+              href={`mailto:${client.email}`}
+              onClick={e => e.stopPropagation()}
+              className="truncate hover:text-indigo-600 transition-colors"
+            >{client.email}</a>
+          </div>
+        )}
       </div>
 
       {/* Budget + pre-approval */}

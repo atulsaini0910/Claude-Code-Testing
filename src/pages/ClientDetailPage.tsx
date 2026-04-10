@@ -163,19 +163,33 @@ export function ClientDetailPage() {
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center gap-2.5">
                     <Phone size={14} className="text-slate-400 shrink-0" />
-                    <InlineEdit
-                      value={client.phone}
-                      onSave={v => handleInlineUpdate('phone', v)}
-                      className="flex-1 text-slate-700"
-                    />
+                    <div className="flex-1 flex items-center gap-2 min-w-0">
+                      <InlineEdit
+                        value={client.phone}
+                        onSave={v => handleInlineUpdate('phone', v)}
+                        className="flex-1 text-slate-700 dark:text-slate-300"
+                      />
+                      {client.phone && (
+                        <a href={`tel:${client.phone.replace(/\s/g, '')}`} className="text-indigo-500 hover:text-indigo-700 shrink-0" title="Call">
+                          <Phone size={12} />
+                        </a>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2.5">
                     <Mail size={14} className="text-slate-400 shrink-0" />
-                    <InlineEdit
-                      value={client.email}
-                      onSave={v => handleInlineUpdate('email', v)}
-                      className="flex-1 text-slate-700"
-                    />
+                    <div className="flex-1 flex items-center gap-2 min-w-0">
+                      <InlineEdit
+                        value={client.email}
+                        onSave={v => handleInlineUpdate('email', v)}
+                        className="flex-1 text-slate-700 dark:text-slate-300"
+                      />
+                      {client.email && (
+                        <a href={`mailto:${client.email}`} className="text-indigo-500 hover:text-indigo-700 shrink-0" title="Send email">
+                          <Mail size={12} />
+                        </a>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2.5">
                     <MapPin size={14} className="text-slate-400 shrink-0" />

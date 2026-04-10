@@ -8,7 +8,7 @@ import { useSidebar } from '../components/layout/AppShell';
 import { useUsers } from '../hooks/useUsers';
 import { useAppSettings } from '../hooks/useAppSettings';
 import { db } from '../lib/storage';
-import type { UserGoals } from '../types';
+import type { UserGoals, AppSettings } from '../types';
 import toast from 'react-hot-toast';
 
 const SHORTCUTS = [
@@ -25,7 +25,7 @@ const SHORTCUTS = [
 export function SettingsPage() {
   const { openSidebar, openCommandPalette } = useSidebar();
   const { currentUser, updateUser, switchUser, users } = useUsers();
-  const { settings, toggleTheme } = useAppSettings();
+  const { settings, toggleTheme, updateSettings } = useAppSettings();
   const [tab, setTab] = useState<'profile' | 'notifications' | 'appearance' | 'goals' | 'shortcuts'>('profile');
   const [name, setName] = useState(currentUser?.name ?? '');
   const [phone, setPhone] = useState(currentUser?.phone ?? '');
@@ -98,7 +98,7 @@ export function SettingsPage() {
             <div>
               <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Switch User (Demo)</label>
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 value={currentUser?.id ?? ''}
                 onChange={e => switchUser(e.target.value)}
               >
@@ -133,7 +133,7 @@ export function SettingsPage() {
                   min={1} max={100}
                   value={goals.closingsGoal}
                   onChange={e => setGoals(p => ({ ...p, closingsGoal: Number(e.target.value) }))}
-                  className="w-20 border border-slate-200 rounded-lg px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="w-20 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
               </div>
 
@@ -150,7 +150,7 @@ export function SettingsPage() {
                   min={0}
                   value={goals.revenueGoal}
                   onChange={e => setGoals(p => ({ ...p, revenueGoal: Number(e.target.value) }))}
-                  className="w-28 border border-slate-200 rounded-lg px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="w-28 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
               </div>
 
@@ -167,7 +167,7 @@ export function SettingsPage() {
                   min={1} max={500}
                   value={goals.activitiesGoal}
                   onChange={e => setGoals(p => ({ ...p, activitiesGoal: Number(e.target.value) }))}
-                  className="w-20 border border-slate-200 rounded-lg px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="w-20 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
               </div>
             </div>
@@ -178,20 +178,31 @@ export function SettingsPage() {
 
         {tab === 'notifications' && (
           <Card className="p-5 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-800">Notification Preferences</h3>
-            {[
-              'Task due reminders',
-              'Deal stage changes',
-              'New client assignments',
-              'Team activity summary (daily)',
-              'Follow-up overdue alerts',
-            ].map(item => (
-              <div key={item} className="flex items-center justify-between">
-                <span className="text-sm text-slate-700">{item}</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" defaultChecked className="sr-only peer" />
-                  <div className="w-9 h-5 bg-slate-200 peer-checked:bg-indigo-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-indigo-300 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4" />
-                </label>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Notification Preferences</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Choose which in-app alerts you receive.</p>
+            </div>
+            {([
+              { key: 'taskDue',         label: 'Task due reminders',           desc: 'Alert when tasks are due today or overdue' },
+              { key: 'stageChanges',    label: 'Deal stage changes',            desc: 'Alert when a deal moves to a new stage' },
+              { key: 'clientAssigned',  label: 'New client assignments',        desc: 'Alert when a client is assigned to you' },
+              { key: 'dailyDigest',     label: 'Daily summary digest',          desc: 'Morning recap of overdue tasks and hot leads' },
+              { key: 'followUpOverdue', label: 'Follow-up overdue alerts',      desc: 'Alert when a client hasn\'t been contacted in 14+ days' },
+            ] as { key: keyof AppSettings['notifications']; label: string; desc: string }[]).map(item => (
+              <div key={item.key} className="flex items-start justify-between gap-4 py-1">
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{item.label}</p>
+                  <p className="text-xs text-slate-400">{item.desc}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    const n = { ...settings.notifications, [item.key]: !settings.notifications?.[item.key] };
+                    updateSettings({ notifications: n });
+                  }}
+                  className={`relative w-9 h-5 rounded-full transition-colors cursor-pointer shrink-0 mt-0.5 ${settings.notifications?.[item.key] !== false ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+                >
+                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${settings.notifications?.[item.key] !== false ? 'left-4' : 'left-0.5'}`} />
+                </button>
               </div>
             ))}
           </Card>
@@ -221,12 +232,14 @@ export function SettingsPage() {
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Data Density</label>
-              <div className="mt-2 flex gap-2">
-                {['Compact', 'Comfortable', 'Spacious'].map(d => (
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Data Density</label>
+              <p className="text-xs text-slate-400 mt-0.5 mb-2">Controls spacing in lists and cards.</p>
+              <div className="flex gap-2">
+                {(['compact', 'comfortable', 'spacious'] as const).map(d => (
                   <button
                     key={d}
-                    className={`flex-1 py-2 text-xs font-medium rounded-lg border transition-all cursor-pointer ${d === 'Comfortable' ? 'border-indigo-500 text-indigo-700 bg-indigo-50' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
+                    onClick={() => updateSettings({ density: d })}
+                    className={`flex-1 py-2 text-xs font-medium rounded-lg border transition-all cursor-pointer capitalize ${settings.density === d ? 'border-indigo-500 text-indigo-700 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-600' : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300'}`}
                   >
                     {d}
                   </button>

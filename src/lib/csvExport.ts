@@ -37,7 +37,7 @@ export function exportClientsCSV(clients: Client[]): void {
   downloadCsv(`clients-export-${new Date().toISOString().slice(0, 10)}.csv`, [headers, ...rows]);
 }
 
-export function exportDealsCSV(deals: Deal[]): void {
+export function exportDealsCSV(deals: Deal[], filename?: string): void {
   const headers = [
     'Title', 'Type', 'Stage', 'Value', 'Commission %', 'Commission $',
     'Close Date', 'Loss Reason', 'Tags', 'Notes', 'Created At',
@@ -49,5 +49,5 @@ export function exportDealsCSV(deals: Deal[]): void {
     d.lossReason ?? '', (d.tags ?? []).join('; '), d.notes,
     d.createdAt.slice(0, 10),
   ]);
-  downloadCsv(`deals-export-${new Date().toISOString().slice(0, 10)}.csv`, [headers, ...rows]);
+  downloadCsv(filename ?? `deals-export-${new Date().toISOString().slice(0, 10)}.csv`, [headers, ...rows]);
 }

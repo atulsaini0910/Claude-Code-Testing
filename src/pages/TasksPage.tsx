@@ -74,7 +74,7 @@ function TaskItem({ task, clientName, onComplete, onDelete }: {
       </div>
 
       <button
-        onClick={onDelete}
+        onClick={() => { if (window.confirm(`Delete "${task.title}"?`)) onDelete(); }}
         className="shrink-0 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all cursor-pointer"
       >
         <Trash2 size={13} />

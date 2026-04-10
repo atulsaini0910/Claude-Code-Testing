@@ -15,6 +15,7 @@ import { TeamPage } from './pages/TeamPage';
 import { ImportPage } from './pages/ImportPage';
 import { ShowingsPage } from './pages/ShowingsPage';
 import { MarketPage } from './pages/MarketPage';
+import { ReportsPage } from './pages/ReportsPage';
 import { db } from './lib/storage';
 
 export default function App() {
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/admin/import" element={<ImportPage />} />
         <Route path="/showings" element={<ShowingsPage />} />
         <Route path="/market" element={<MarketPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </AppShell>

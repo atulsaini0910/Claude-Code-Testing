@@ -18,6 +18,7 @@ import { useTasks } from '../hooks/useTasks';
 import { useUsers } from '../hooks/useUsers';
 import { useShowings } from '../hooks/useShowings';
 import { computeSuggestions } from '../lib/suggestions';
+import { db } from '../lib/storage';
 import { timeAgo, formatCurrency, cn } from '../lib/utils';
 
 const STAGE_LABEL: Record<string, string> = {
@@ -107,6 +108,28 @@ export function DashboardPage() {
     computeSuggestions(clients, deals, tasks, showings, entries),
   [clients, deals, tasks, showings, entries]);
 
+  // Goals progress
+  const goalsProgress = useMemo(() => {
+    if (!currentUser) return null;
+    const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const goal = db.userGoals.get().find(g => g.userId === currentUser.id && g.month === monthStr);
+    if (!goal) return null;
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const closedThisMonth = deals.filter(d => d.stage === 'closed_won' && d.updatedAt >= monthStart && d.assignedTo === currentUser.id).length;
+    const commissionThisMonth = deals
+      .filter(d => d.stage === 'closed_won' && d.updatedAt >= monthStart && d.assignedTo === currentUser.id)
+      .reduce((s, d) => s + ((d.value ?? 0) * (d.commissionPct ?? 0) / 100), 0);
+    const activitiesThisMonth = entries.filter(e => {
+      const c = clients.find(cl => cl.id === e.clientId);
+      return e.createdAt >= monthStart && c?.assignedTo === currentUser.id;
+    }).length;
+    return {
+      closings: { actual: closedThisMonth, goal: goal.closingsGoal },
+      revenue: { actual: commissionThisMonth, goal: goal.revenueGoal },
+      activities: { actual: activitiesThisMonth, goal: goal.activitiesGoal },
+    };
+  }, [currentUser, deals, entries, clients, now]);
+
   const greeting = currentUser ? `Welcome back, ${currentUser.name.split(' ')[0]}` : 'Dashboard';
 
   return (
@@ -165,6 +188,40 @@ export function DashboardPage() {
               </Card>
             )}
           </div>
+        )}
+
+        {/* Monthly Goals Progress */}
+        {goalsProgress && (
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp size={15} className="text-indigo-500" />
+                <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Monthly Goals</h2>
+              </div>
+              <Link to="/settings" className="text-xs text-indigo-600 hover:underline">Edit goals</Link>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: 'Closings', actual: goalsProgress.closings.actual, goal: goalsProgress.closings.goal, format: (v: number) => String(v), color: 'bg-emerald-500' },
+                { label: 'Commission', actual: goalsProgress.revenue.actual, goal: goalsProgress.revenue.goal, format: (v: number) => formatCurrency(v), color: 'bg-indigo-500' },
+                { label: 'Activities', actual: goalsProgress.activities.actual, goal: goalsProgress.activities.goal, format: (v: number) => String(v), color: 'bg-purple-500' },
+              ].map(g => {
+                const pct = g.goal > 0 ? Math.min(100, Math.round((g.actual / g.goal) * 100)) : 0;
+                return (
+                  <div key={g.label}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">{g.label}</span>
+                      <span className={cn('text-xs font-bold', pct >= 100 ? 'text-emerald-600' : pct >= 60 ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-300')}>{pct}%</span>
+                    </div>
+                    <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div className={cn('h-full rounded-full transition-all', g.color, pct >= 100 && 'bg-emerald-500')} style={{ width: `${pct}%` }} />
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">{g.format(g.actual)} / {g.format(g.goal)}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">

@@ -36,7 +36,7 @@ export function DealCard({ deal, clientName, onClick, overlay }: DealCardProps) 
       ref={setNodeRef}
       style={style}
       className={cn(
-        'bg-white rounded-xl border border-slate-100 shadow-sm group',
+        'bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm group',
         isDragging && !overlay && 'opacity-40',
         overlay && 'shadow-xl rotate-1 scale-105',
         'transition-shadow'
@@ -52,11 +52,11 @@ export function DealCard({ deal, clientName, onClick, overlay }: DealCardProps) 
           <GripVertical size={13} />
         </button>
         <div className="flex-1 min-w-0 cursor-pointer" onClick={onClick}>
-          <p className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">{deal.title}</p>
+          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2">{deal.title}</p>
           {clientName && (
             <div className="flex items-center gap-1 mt-1">
               <User size={10} className="text-slate-400" />
-              <span className="text-xs text-slate-500 truncate">{clientName}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 truncate">{clientName}</span>
             </div>
           )}
         </div>
@@ -67,9 +67,9 @@ export function DealCard({ deal, clientName, onClick, overlay }: DealCardProps) 
         {deal.value && (
           <div className="flex items-center gap-1">
             <DollarSign size={11} className="text-slate-400" />
-            <span className="text-xs font-semibold text-slate-700">{formatCurrency(deal.value)}</span>
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{formatCurrency(deal.value)}</span>
             {deal.commissionPct && (
-              <span className="text-[10px] text-slate-400 ml-auto">
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-auto">
                 {formatCurrency(deal.value * deal.commissionPct / 100)} comm.
               </span>
             )}
@@ -80,7 +80,7 @@ export function DealCard({ deal, clientName, onClick, overlay }: DealCardProps) 
         {deal.closeDate && (
           <div className="flex items-center gap-1">
             <Calendar size={11} className="text-slate-400" />
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               Close {new Date(deal.closeDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </span>
           </div>
@@ -90,7 +90,7 @@ export function DealCard({ deal, clientName, onClick, overlay }: DealCardProps) 
         <div className="flex items-center justify-between">
           <div className="flex gap-1 flex-wrap">
             {deal.tags.slice(0, 2).map(t => (
-              <span key={t} className="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded-full">{t}</span>
+              <span key={t} className="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full">{t}</span>
             ))}
           </div>
           <div className="flex items-center gap-1">

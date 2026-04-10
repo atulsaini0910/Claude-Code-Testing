@@ -38,8 +38,12 @@ export function DealForm({ initial, clients, properties, defaultClientId, onSubm
 
   const validate = () => {
     const e: typeof errors = {};
-    if (!form.title.trim()) e.title = 'Title required';
-    if (!form.clientId) e.clientId = 'Client required';
+    if (!form.title.trim()) e.title = 'Deal title is required';
+    else if (form.title.trim().length < 3) e.title = 'Title must be at least 3 characters';
+    if (!form.clientId) e.clientId = 'Please select a client';
+    if (form.value !== undefined && form.value < 0) e.value = 'Value cannot be negative';
+    if (form.commissionPct !== undefined && (form.commissionPct < 0 || form.commissionPct > 20)) e.commissionPct = 'Commission must be 0–20%';
+    if (form.agentSplitPct !== undefined && (form.agentSplitPct < 0 || form.agentSplitPct > 100)) e.agentSplitPct = 'Split must be 0–100%';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -81,9 +85,9 @@ export function DealForm({ initial, clients, properties, defaultClientId, onSubm
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <TextInput label="Deal Value ($)" type="number" value={form.value ?? ''} onChange={e => set('value', e.target.value ? Number(e.target.value) : undefined)} placeholder="500000" />
-        <TextInput label="Commission (%)" type="number" value={form.commissionPct ?? ''} onChange={e => set('commissionPct', e.target.value ? Number(e.target.value) : undefined)} placeholder="3" />
-        <TextInput label="Agent Split (%)" type="number" value={form.agentSplitPct ?? ''} onChange={e => set('agentSplitPct', e.target.value ? Number(e.target.value) : undefined)} placeholder="70" />
+        <TextInput label="Deal Value ($)" type="number" value={form.value ?? ''} onChange={e => set('value', e.target.value ? Number(e.target.value) : undefined)} error={errors.value as string} placeholder="500000" />
+        <TextInput label="Commission (%)" type="number" value={form.commissionPct ?? ''} onChange={e => set('commissionPct', e.target.value ? Number(e.target.value) : undefined)} error={errors.commissionPct as string} placeholder="3" />
+        <TextInput label="Agent Split (%)" type="number" value={form.agentSplitPct ?? ''} onChange={e => set('agentSplitPct', e.target.value ? Number(e.target.value) : undefined)} error={errors.agentSplitPct as string} placeholder="70" />
       </div>
 
       <TextInput label="Expected Close Date" type="date" value={form.closeDate ? form.closeDate.slice(0, 10) : ''} onChange={e => set('closeDate', e.target.value || undefined)} />
