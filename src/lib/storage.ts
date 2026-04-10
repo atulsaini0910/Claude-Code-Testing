@@ -469,6 +469,35 @@ export function initSeedData(): void {
     { userId: 'u3', month: now.toISOString().slice(0, 7), closingsGoal: 2, revenueGoal: 25000, activitiesGoal: 30 },
   ];
 
+  // Market data — 6 months for Austin, Houston, Dallas
+  const marketData: import('../types').MarketData[] = (() => {
+    const entries: import('../types').MarketData[] = [];
+    const areas = [
+      { name: 'Austin, TX',  base: 525000, dom: 22, lsr: 0.98, inv: 1850 },
+      { name: 'Houston, TX', base: 345000, dom: 31, lsr: 0.96, inv: 3200 },
+      { name: 'Dallas, TX',  base: 415000, dom: 26, lsr: 0.97, inv: 2600 },
+    ];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      areas.forEach((a, ai) => {
+        // slight monthly variation
+        const growth = 1 + (5 - i) * 0.004 + (ai === 0 ? 0.002 : 0);
+        entries.push({
+          id: `m${ai}_${i}`,
+          area: a.name,
+          month,
+          medianPrice: Math.round(a.base * growth),
+          daysOnMarket: Math.round(a.dom + (i % 2 === 0 ? 1 : -1) * (ai + 1)),
+          listToSaleRatio: parseFloat((a.lsr + (i % 3 === 0 ? 0.005 : -0.002)).toFixed(3)),
+          inventory: Math.round(a.inv + (5 - i) * 40 * (ai + 1) * (i % 2 === 0 ? 1 : -1)),
+          createdAt: d.toISOString(),
+        });
+      });
+    }
+    return entries;
+  })();
+
   db.users.set(users);
   db.clients.set(clients);
   db.properties.set(properties);
@@ -478,5 +507,6 @@ export function initSeedData(): void {
   db.notifications.set(notifications);
   db.showings.set(showings);
   db.userGoals.set(userGoals);
+  db.marketData.set(marketData);
   db.currentUser.set(users[0]); // Default to Alex Rivera (admin)
 }

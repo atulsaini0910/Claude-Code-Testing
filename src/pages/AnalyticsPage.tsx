@@ -61,11 +61,11 @@ export function AnalyticsPage() {
 
   // Activity by type (last 30 days)
   const activityByType = useMemo(() => {
-    const cutoff = Date.now() - 30 * 86400000;
-    const recent = entries.filter(e => new Date(e.createdAt).getTime() > cutoff);
     const counts: Record<string, number> = { call: 0, email: 0, meeting: 0, note: 0, sms: 0 };
-    recent.forEach(e => { counts[e.type] = (counts[e.type] ?? 0) + 1; });
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+    entries.forEach(e => { counts[e.type] = (counts[e.type] ?? 0) + 1; });
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .filter(d => d.value > 0);
   }, [entries]);
 
   // Weekly activity trend (last 8 weeks)
@@ -188,15 +188,20 @@ export function AnalyticsPage() {
           </Card>
 
           <Card className="p-5">
-            <h3 className="text-sm font-semibold text-slate-800 mb-4">Activity Mix (30 days)</h3>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={activityByType} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} label={false} labelLine={false} fontSize={11}>
-                  {activityByType.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-              </PieChart>
-            </ResponsiveContainer>
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-4">Activity Mix</h3>
+            {activityByType.length === 0 ? (
+              <div className="flex items-center justify-center h-[200px] text-sm text-slate-400">No activity data yet</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={activityByType} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={65} label={false} labelLine={false} fontSize={11}>
+                    {activityByType.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} formatter={(v) => [`${v} activities`, '']} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} formatter={(v) => v.charAt(0).toUpperCase() + v.slice(1)} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </Card>
         </div>
 

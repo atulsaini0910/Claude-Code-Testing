@@ -108,6 +108,25 @@ export function DashboardPage() {
     computeSuggestions(clients, deals, tasks, showings, entries),
   [clients, deals, tasks, showings, entries]);
 
+  // 30-day vs prior-30-day trends for KPI cards
+  const trends = useMemo(() => {
+    const nowMs = Date.now();
+    const ms30 = 30 * 86400000;
+    const delta = (a: number, b: number) => {
+      if (b === 0 && a === 0) return undefined;
+      if (b === 0) return { value: 100, direction: 'up' as const };
+      const p = Math.round(((a - b) / b) * 100);
+      return { value: Math.abs(p), direction: p > 5 ? 'up' as const : p < -5 ? 'down' as const : 'neutral' as const };
+    };
+    const cThis = clients.filter(c => nowMs - new Date(c.createdAt).getTime() < ms30).length;
+    const cPrior = clients.filter(c => { const d = nowMs - new Date(c.createdAt).getTime(); return d >= ms30 && d < 2 * ms30; }).length;
+    const dThis = deals.filter(d => d.stage !== 'closed_lost' && nowMs - new Date(d.createdAt).getTime() < ms30).length;
+    const dPrior = deals.filter(d => { const a = nowMs - new Date(d.createdAt).getTime(); return d.stage !== 'closed_lost' && a >= ms30 && a < 2 * ms30; }).length;
+    const pThis = deals.filter(d => !['closed_won','closed_lost'].includes(d.stage) && nowMs - new Date(d.createdAt).getTime() < ms30).reduce((s, d) => s + (d.value ?? 0), 0);
+    const pPrior = deals.filter(d => { const a = nowMs - new Date(d.createdAt).getTime(); return !['closed_won','closed_lost'].includes(d.stage) && a >= ms30 && a < 2 * ms30; }).reduce((s, d) => s + (d.value ?? 0), 0);
+    return { clients: delta(cThis, cPrior), deals: delta(dThis, dPrior), pipeline: delta(pThis, pPrior) };
+  }, [clients, deals]);
+
   // Goals progress
   const goalsProgress = useMemo(() => {
     if (!currentUser) return null;
@@ -158,10 +177,10 @@ export function DashboardPage() {
 
         {/* KPI row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Total Clients" value={stats.total} icon={<Users size={18} />} color="text-indigo-600" />
+          <StatCard label="Total Clients" value={stats.total} icon={<Users size={18} />} color="text-indigo-600" trend={trends.clients} />
           <StatCard label="Active Clients" value={stats.active} icon={<UserCheck size={18} />} color="text-emerald-600" />
-          <StatCard label="Pipeline Value" value={formatCurrency(pipelineValue)} icon={<TrendingUp size={18} />} color="text-blue-600" />
-          <StatCard label="Active Deals" value={stats.activeDeals} icon={<Briefcase size={18} />} color="text-purple-600" />
+          <StatCard label="Pipeline Value" value={formatCurrency(pipelineValue)} icon={<TrendingUp size={18} />} color="text-blue-600" trend={trends.pipeline} />
+          <StatCard label="Active Deals" value={stats.activeDeals} icon={<Briefcase size={18} />} color="text-purple-600" trend={trends.deals} />
         </div>
 
         {/* Forecast + Commission row */}

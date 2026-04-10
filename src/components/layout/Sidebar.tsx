@@ -20,12 +20,12 @@ const mainNav = [
   { to: '/analytics',  label: 'Analytics',       icon: BarChart2 },
   { to: '/reports',    label: 'Reports',         icon: FileText },
   { to: '/market',     label: 'Market Pulse',    icon: TrendingUp },
+  { to: '/settings',   label: 'Settings',        icon: Settings },
 ];
 
 const adminNav = [
   { to: '/admin/team',   label: 'Team',           icon: UserCog },
   { to: '/admin/import', label: 'Import',         icon: FolderInput },
-  { to: '/settings',     label: 'Settings',       icon: Settings },
 ];
 
 interface SidebarProps {

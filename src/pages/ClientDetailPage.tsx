@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Phone, Mail, MapPin, DollarSign, Home, Edit2, Trash2, ArrowLeft,
-  Flame, Thermometer, Snowflake, ShieldCheck, Tag, TrendingUp, CheckCircle2, Circle,
+  Flame, Thermometer, Snowflake, ShieldCheck, Tag, TrendingUp, CheckCircle2, Circle, Plus,
 } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
 import { ActivityFeed } from '../components/activity/ActivityFeed';
@@ -18,6 +18,7 @@ import { useActivityLog } from '../hooks/useActivityLog';
 import { useDeals } from '../hooks/useDeals';
 import { useTasks } from '../hooks/useTasks';
 import { useProperties } from '../hooks/useProperties';
+import { DealForm } from '../components/deals/DealForm';
 import { computeLeadScoreBreakdown } from '../lib/leadScoring';
 import { ClientSummaryCard } from '../components/clients/ClientSummaryCard';
 import { FollowUpDraftButton } from '../components/clients/FollowUpDraftButton';
@@ -37,14 +38,15 @@ export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { openSidebar, openCommandPalette } = useSidebar();
-  const { getClient, updateClient, deleteClient } = useClients();
+  const { clients, getClient, updateClient, deleteClient } = useClients();
   const { getEntriesForClient, addEntry, deleteEntry } = useActivityLog();
-  const { deals } = useDeals();
+  const { deals, addDeal } = useDeals();
   const { tasks, completeTask } = useTasks();
   const { properties } = useProperties();
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showAddDeal, setShowAddDeal] = useState(false);
   const [tab, setTab] = useState<Tab>('overview');
 
   const client = id ? getClient(id) : undefined;
@@ -319,12 +321,17 @@ export function ClientDetailPage() {
         {/* TAB: Deals */}
         {tab === 'deals' && (
           <div className="space-y-3 max-w-3xl">
+            <div className="flex justify-end">
+              <Button size="sm" onClick={() => setShowAddDeal(true)}>
+                <Plus size={14} /> New Deal
+              </Button>
+            </div>
             {clientDeals.length === 0 ? (
               <Card className="p-8 text-center">
-                <p className="text-slate-400 text-sm">No deals linked to this client.</p>
-                <Link to="/deals">
-                  <Button variant="secondary" size="sm" className="mt-3">View Pipeline</Button>
-                </Link>
+                <p className="text-slate-400 text-sm">No deals linked to this client yet.</p>
+                <Button size="sm" className="mt-3" onClick={() => setShowAddDeal(true)}>
+                  <Plus size={14} /> Create First Deal
+                </Button>
               </Card>
             ) : (
               clientDeals.map(deal => (
@@ -458,6 +465,22 @@ export function ClientDetailPage() {
             <Button variant="secondary" onClick={() => setConfirmDelete(false)}>Cancel</Button>
             <Button variant="danger" onClick={handleDelete}>Delete Client</Button>
           </div>
+        </Modal>
+      )}
+
+      {showAddDeal && (
+        <Modal title="New Deal" onClose={() => setShowAddDeal(false)}>
+          <DealForm
+            defaultClientId={client.id}
+            clients={clients.map(c => ({ id: c.id, name: c.name }))}
+            properties={properties.map(p => ({ id: p.id, addressLine1: p.addressLine1, city: p.city }))}
+            onSubmit={(data) => {
+              addDeal(data);
+              setShowAddDeal(false);
+              toast.success('Deal created');
+            }}
+            onCancel={() => setShowAddDeal(false)}
+          />
         </Modal>
       )}
     </div>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { CheckSquare, Plus, Circle, CheckCircle2, Calendar, Flag, Trash2, AlertTriangle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { CheckSquare, Plus, Circle, CheckCircle2, Calendar, Flag, Trash2, AlertTriangle, Search } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
 import { Button } from '../components/ui/Button';
 import { Drawer } from '../components/ui/Drawer';
@@ -162,8 +162,28 @@ export function TasksPage() {
   const { groupedTasks, completeTask, deleteTask, addTask } = useTasks();
   const { clients } = useClients();
   const [showDrawer, setShowDrawer] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const clientNames = new Map(clients.map(c => [c.id, c.name]));
+
+  const filterTasks = (tasks: Task[]) => {
+    if (!searchQuery.trim()) return tasks;
+    const q = searchQuery.toLowerCase();
+    return tasks.filter(t =>
+      t.title.toLowerCase().includes(q) ||
+      (t.description?.toLowerCase().includes(q)) ||
+      (t.clientId && clientNames.get(t.clientId)?.toLowerCase().includes(q))
+    );
+  };
+
+  const filteredGroups = useMemo(() => ({
+    overdue: filterTasks(groupedTasks.overdue),
+    today: filterTasks(groupedTasks.today),
+    upcoming: filterTasks(groupedTasks.upcoming),
+    later: filterTasks(groupedTasks.later),
+    completed: filterTasks(groupedTasks.completed),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [groupedTasks, searchQuery, clientNames]);
 
   const handleAdd = (data: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     addTask(data);
@@ -191,7 +211,18 @@ export function TasksPage() {
         }
       />
 
-      <div className="flex-1 p-4 md:p-6">
+      <div className="flex-1 p-4 md:p-6 space-y-4">
+        {/* Search */}
+        <div className="relative max-w-sm">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-slate-800"
+          />
+        </div>
         {totalOpen === 0 && groupedTasks.completed.length === 0 ? (
           <EmptyState
             icon={<CheckSquare size={40} />}
@@ -202,8 +233,8 @@ export function TasksPage() {
         ) : (
           <div className="max-w-2xl space-y-6">
             <TaskSection
-              title={`Overdue (${groupedTasks.overdue.length})`}
-              tasks={groupedTasks.overdue}
+              title={`Overdue (${filteredGroups.overdue.length})`}
+              tasks={filteredGroups.overdue}
               icon={<AlertTriangle size={13} />}
               clientNames={clientNames}
               onComplete={handleComplete}
@@ -212,7 +243,7 @@ export function TasksPage() {
             />
             <TaskSection
               title="Today"
-              tasks={groupedTasks.today}
+              tasks={filteredGroups.today}
               icon={<Flag size={13} />}
               clientNames={clientNames}
               onComplete={handleComplete}
@@ -221,7 +252,7 @@ export function TasksPage() {
             />
             <TaskSection
               title="Upcoming (next 7 days)"
-              tasks={groupedTasks.upcoming}
+              tasks={filteredGroups.upcoming}
               icon={<Calendar size={13} />}
               clientNames={clientNames}
               onComplete={handleComplete}
@@ -229,7 +260,7 @@ export function TasksPage() {
             />
             <TaskSection
               title="Later"
-              tasks={groupedTasks.later}
+              tasks={filteredGroups.later}
               icon={<Calendar size={13} />}
               clientNames={clientNames}
               onComplete={handleComplete}
@@ -237,7 +268,7 @@ export function TasksPage() {
             />
             <TaskSection
               title="Recently Completed"
-              tasks={groupedTasks.completed}
+              tasks={filteredGroups.completed}
               icon={<CheckCircle2 size={13} />}
               clientNames={clientNames}
               onComplete={handleComplete}

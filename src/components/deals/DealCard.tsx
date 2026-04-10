@@ -26,9 +26,13 @@ export function DealCard({ deal, clientName, onClick, overlay }: DealCardProps) 
     transition,
   };
 
-  const daysInStage = Math.floor(
-    (Date.now() - new Date(deal.updatedAt).getTime()) / 86400000
-  );
+  const daysInStage = (() => {
+    if (deal.stageHistory && deal.stageHistory.length > 0) {
+      const last = deal.stageHistory[deal.stageHistory.length - 1];
+      return Math.floor((Date.now() - new Date(last.enteredAt).getTime()) / 86400000);
+    }
+    return Math.floor((Date.now() - new Date(deal.updatedAt).getTime()) / 86400000);
+  })();
   const prob = STAGE_PROB[deal.stage] ?? 0;
 
   return (

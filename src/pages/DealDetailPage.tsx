@@ -60,15 +60,16 @@ export function DealDetailPage() {
   const { getUserName } = useUsers();
   const { canDelete } = usePermissions();
 
+  // Resolve deal first so state initializers can safely reference it
+  const deal = id ? getDeal(id) : undefined;
+
   const [showEdit, setShowEdit] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [tab, setTab] = useState<'overview' | 'activity' | 'tasks' | 'showings'>('overview');
   const [showAddShowing, setShowAddShowing] = useState(false);
-  const [showingForm, setShowingForm] = useState({ scheduledAt: '', agentNotes: '', propertyId: '' });
+  const [showingForm, setShowingForm] = useState({ scheduledAt: '', agentNotes: '', propertyId: deal?.propertyId ?? '' });
   // checklist: persisted in deal.checklist
   const [checklist, setChecklist] = useState<Record<string, boolean>>(() => deal?.checklist ?? {});
-
-  const deal = id ? getDeal(id) : undefined;
 
   const client = deal ? clients.find(c => c.id === deal.clientId) : undefined;
   const property = deal?.propertyId ? properties.find(p => p.id === deal.propertyId) : undefined;
@@ -541,22 +542,35 @@ export function DealDetailPage() {
         <Modal title="Schedule Showing" onClose={() => setShowAddShowing(false)}>
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Date & Time</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Property</label>
+              <select
+                value={showingForm.propertyId}
+                onChange={e => setShowingForm(p => ({ ...p, propertyId: e.target.value }))}
+                className="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option value="">Select property…</option>
+                {properties.map(p => (
+                  <option key={p.id} value={p.id}>{p.addressLine1}, {p.city}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date & Time</label>
               <input
                 type="datetime-local"
                 value={showingForm.scheduledAt}
                 onChange={e => setShowingForm(p => ({ ...p, scheduledAt: e.target.value }))}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Agent Notes</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Agent Notes</label>
               <textarea
                 rows={3}
                 value={showingForm.agentNotes}
                 onChange={e => setShowingForm(p => ({ ...p, agentNotes: e.target.value }))}
                 placeholder="Preparation notes, what to highlight..."
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
             <div className="flex justify-end gap-2">

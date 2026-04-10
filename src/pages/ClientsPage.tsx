@@ -8,6 +8,7 @@ import { BulkActionBar } from '../components/clients/BulkActionBar';
 import { SavedViewChips } from '../components/clients/SavedViewChips';
 import { SaveViewPopover } from '../components/ui/SaveViewPopover';
 import { Modal } from '../components/ui/Modal';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useSidebar } from '../components/layout/AppShell';
@@ -26,6 +27,7 @@ export function ClientsPage() {
   const { entries } = useActivityLog();
   const [showModal, setShowModal] = useState(false);
   const [activeSegment, setActiveSegment] = useState<string | null>(null);
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
 
   const lastActivityMap = useMemo(() => {
     const map = new Map<string, typeof entries[number]>();
@@ -65,11 +67,13 @@ export function ClientsPage() {
     bulk.clearAll();
   };
 
-  const handleBulkDelete = () => {
-    if (!confirm(`Delete ${bulk.selectedItems.length} clients? This cannot be undone.`)) return;
+  const handleBulkDelete = () => setConfirmBulkDelete(true);
+
+  const executeBulkDelete = () => {
     bulk.selectedItems.forEach(c => deleteClient(c.id));
     toast.success(`${bulk.selectedItems.length} clients deleted`);
     bulk.clearAll();
+    setConfirmBulkDelete(false);
   };
 
   const handleBulkExport = () => {
@@ -181,6 +185,16 @@ export function ClientsPage() {
         <Modal title="Add New Client" onClose={() => setShowModal(false)}>
           <ClientForm onSubmit={handleAdd} onCancel={() => setShowModal(false)} />
         </Modal>
+      )}
+
+      {confirmBulkDelete && (
+        <ConfirmDialog
+          title="Delete Clients"
+          message={`Are you sure you want to permanently delete ${bulk.selectedItems.length} client${bulk.selectedItems.length !== 1 ? 's' : ''}? This cannot be undone.`}
+          confirmLabel="Delete All"
+          onConfirm={executeBulkDelete}
+          onCancel={() => setConfirmBulkDelete(false)}
+        />
       )}
     </div>
   );
