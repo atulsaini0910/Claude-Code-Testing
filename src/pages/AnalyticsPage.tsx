@@ -330,14 +330,14 @@ export function AnalyticsPage() {
         <Card className="p-5">
           <h3 className="text-sm font-semibold text-slate-800 mb-4">Win / Loss Analysis</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-emerald-50 rounded-xl p-4 text-center">
-              <p className="text-3xl font-bold text-emerald-700">{deals.filter(d => d.stage === 'closed_won').length}</p>
-              <p className="text-xs text-emerald-600 font-medium mt-1">Deals Won</p>
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 text-center">
+              <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">{deals.filter(d => d.stage === 'closed_won').length}</p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">Deals Won</p>
               <p className="text-xs text-slate-400 mt-0.5">{formatCurrency(deals.filter(d => d.stage === 'closed_won').reduce((s, d) => s + ((d.value ?? 0) * (d.commissionPct ?? 0) / 100), 0))} commission</p>
             </div>
-            <div className="bg-red-50 rounded-xl p-4 text-center">
-              <p className="text-3xl font-bold text-red-600">{deals.filter(d => d.stage === 'closed_lost').length}</p>
-              <p className="text-xs text-red-600 font-medium mt-1">Deals Lost</p>
+            <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 text-center">
+              <p className="text-3xl font-bold text-red-600 dark:text-red-400">{deals.filter(d => d.stage === 'closed_lost').length}</p>
+              <p className="text-xs text-red-600 dark:text-red-400 font-medium mt-1">Deals Lost</p>
               <p className="text-xs text-slate-400 mt-0.5">{deals.filter(d => d.stage === 'closed_lost').reduce((s, d) => s + (d.value ?? 0), 0) > 0 ? formatCurrency(deals.filter(d => d.stage === 'closed_lost').reduce((s, d) => s + (d.value ?? 0), 0)) + ' potential' : 'No value logged'}</p>
             </div>
             <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">

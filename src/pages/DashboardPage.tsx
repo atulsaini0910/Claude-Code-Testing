@@ -187,7 +187,7 @@ export function DashboardPage() {
         {(forecast.count > 0 || monthlyCommission > 0) && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {forecast.count > 0 && (
-              <Card className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-100">
+              <Card className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30 border-indigo-100 dark:border-indigo-800">
                 <div className="flex items-center gap-2 mb-1">
                   <Calendar size={14} className="text-indigo-500" />
                   <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">Closing This Month</p>
@@ -197,7 +197,7 @@ export function DashboardPage() {
               </Card>
             )}
             {monthlyCommission > 0 && (
-              <Card className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-100">
+              <Card className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border-emerald-100 dark:border-emerald-800">
                 <div className="flex items-center gap-2 mb-1">
                   <DollarSign size={14} className="text-emerald-600" />
                   <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Commission Earned (Month)</p>
@@ -323,7 +323,7 @@ export function DashboardPage() {
                 <Link to="/tasks" className="text-xs text-indigo-600 hover:underline">View all</Link>
               </div>
               {overdueTasks.length > 0 && (
-                <div className="mb-2 px-2 py-1.5 bg-red-50 rounded-lg text-xs text-red-600 font-medium">
+                <div className="mb-2 px-2 py-1.5 bg-red-50 dark:bg-red-900/20 rounded-lg text-xs text-red-600 dark:text-red-400 font-medium">
                   {overdueTasks.length} overdue task{overdueTasks.length > 1 ? 's' : ''}
                 </div>
               )}

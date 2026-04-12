@@ -22,6 +22,27 @@ body {
   color: #e2e8f0;
 }
 
+/* ─── Dark mode: remap neutral slate text (catches classes without dark: counterparts) ─────────
+   Specificity 0-2-0 beats Tailwind's base utilities (0-1-0).
+   Consistent with explicit dark:text-slate-* variants used throughout components.           ─── */
+.dark .text-slate-900 { color: #f1f5f9; }
+.dark .text-slate-800 { color: #f1f5f9; }
+.dark .text-slate-700 { color: #e2e8f0; }
+.dark .text-slate-600 { color: #94a3b8; }
+
+/* ─── Dark mode: remap white / plain light backgrounds ─── */
+.dark .bg-white { background-color: #1e293b; }
+
+/* ─── Dark mode: remap light borders ─── */
+.dark .border-slate-50  { border-color: #334155; }
+.dark .border-slate-100 { border-color: #334155; }
+.dark .border-slate-200 { border-color: #475569; }
+
+/* ─── Dark mode: hover states on white/light backgrounds ─── */
+.dark .hover\:bg-white:hover    { background-color: #334155; }
+.dark .hover\:bg-slate-50:hover  { background-color: #334155; }
+.dark .hover\:bg-slate-100:hover { background-color: #475569; }
+
 /* Inputs, textareas, selects */
 .dark input:not([type="checkbox"]):not([type="radio"]),
 .dark textarea,

@@ -100,17 +100,17 @@ export function DealCard({ deal, clientName, onClick, overlay }: DealCardProps) 
           <div className="flex items-center gap-1">
             <span className={cn(
               'text-[10px] px-1.5 py-0.5 rounded-full font-semibold',
-              prob >= 75 ? 'bg-emerald-50 text-emerald-600' :
-              prob >= 40 ? 'bg-amber-50 text-amber-600' :
-                           'bg-red-50 text-red-500'
+              prob >= 75 ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' :
+              prob >= 40 ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
+                           'bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400'
             )}>
               {prob}%
             </span>
             <span className={cn(
               'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
-              daysInStage > 14 ? 'bg-red-50 text-red-500' :
-              daysInStage > 7  ? 'bg-amber-50 text-amber-600' :
-                                 'bg-slate-50 text-slate-400'
+              daysInStage > 14 ? 'bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400' :
+              daysInStage > 7  ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
+                                 'bg-slate-50 dark:bg-slate-700/50 text-slate-400'
             )}>
               {daysInStage}d
             </span>
