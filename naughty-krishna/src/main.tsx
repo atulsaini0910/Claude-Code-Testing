@@ -9,7 +9,7 @@ if (!root) throw new Error('Root element not found');
 
 createRoot(root).render(
   <StrictMode>
-    <BrowserRouter basename="/naughty-krishna">
+    <BrowserRouter>
       <App />
     </BrowserRouter>
   </StrictMode>,

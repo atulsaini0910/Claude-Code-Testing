@@ -80,6 +80,17 @@ export interface CateringInquiryData {
   message: string;
 }
 
+// ─── Checkout ────────────────────────────────────────────────────────────────
+
+export interface CheckoutFormData {
+  name: string;
+  phone: string;
+  email: string;
+  deliveryAddress: string;
+  notes?: string;
+  paymentMethod: 'card' | 'cash';
+}
+
 // ─── Contact ─────────────────────────────────────────────────────────────────
 
 export interface ContactFormData {

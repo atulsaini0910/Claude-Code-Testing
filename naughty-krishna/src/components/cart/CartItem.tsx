@@ -5,7 +5,7 @@ import { formatPrice } from '@/lib/utils';
 import type { CartItem as CartItemType } from '@/types';
 
 export function CartItem({ item }: { item: CartItemType }) {
-  const { updateQuantity, removeItem } = useCartStore();
+  const { updateQuantity } = useCartStore();
 
   return (
     <motion.div
